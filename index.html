@@ -1,0 +1,74 @@
+<!--
+Copyright (c) 2015, David Andrade
+-->
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Five Bomber</title>
+    <script src="thirdparty/hydra-sdk.js"></script>
+    <script> // Facebook login scripts
+      function fbLogin() {
+        FB.login(function(response) {
+          if (response.status === 'connected') {
+            externalAuth({'facebook':FB.getAccessToken()});
+          }
+        }, {scope: 'public_profile,email'});
+      }
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '376926805793164',
+          cookie     : true,  // enable cookies to allow the server to access the session
+          xfbml      : false,  // do not parse social plugins on this page
+          version    : 'v2.0' // use version 2.0
+        });
+      };
+
+      // Load the SDK
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "http://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <script type="text/javascript"> // Google+ login
+      function googleLoginCallback(authResult) {
+        if (authResult['status']['signed_in'] && authResult['status']['method'] == 'PROMPT') {
+          externalAuth({'google': authResult['access_token']});
+        }
+      }
+
+      function googleLogin() {
+        gapi.auth.signIn({ 'clientid' : '453175303563-3fqvtuul42jo0dapqh9qen47i3rn96n5.apps.googleusercontent.com',
+                           'scope' : 'profile',
+                           'cookiepolicy' : 'single_host_origin',
+                           'callback' : 'googleLoginCallback' });
+      }
+
+      // Load the SDK
+      (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/client:plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="fb-root"></div>
+
+    <h1>Five Bomber</h1>
+
+    <div class="footer">
+      Copyright 2015 David Andrade. Source on <a href="http://github.com/mvdavid7/five-bomber" target="_blank">GitHub</a>.
+      <br/>
+      Powered by <a href="http://hydra.agoragames.com/" target="_blank">Hydra</a>.
+    </div>
+
+    <script type="application/dart" src="text-adventure.dart"></script>
+    <script src="packages/browser/dart.js"></script>
+  </body>
+</html>
