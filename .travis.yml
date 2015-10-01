@@ -4,8 +4,9 @@ dart:
 env:
   global:
     - GH_REF: github.com/mvdavid7/five-bomber.git
-    - secure: "ChxFXajf6Bwut7d9sQc23+Ln7eoGRYRVDA5xGoAM7rIRgEJC9u3AhVbWXCm2eZV9LWmPZvLZ5GbvkSHT0zseLjLhbqn1Yxh09L3XdXWFGaWCNgmY/EAYRYclfVh312NTtQydxnNusOMBtE6sZfTnI+E2CCrjszYaL/CutSaFAzQ="
+    - secure: kibxltLNKsOGtpkQwTFFcgmhbB+muUuc7bCHMhDhXmUSbWkm9agadCrhePYX/UbQLuHmPF7+qkdhNfbDyEn858iFhYrf6K0YAAQEDSJoD3fE6uU3Q18ZpagjndhveM4d74ruo2GLuKBJ8lc+6UF4RwMGcPx5+2ylzTB1cIHpZLxJJlgXw/FsLpxO3n8yhJbvkmiOv70P/aoyBd25gFTQX9tpZZ9vwut6tFzNI9QjkUbDED7TZkqp6I6vfjm9RAFw16RKvD0Vw6nKVidEN+ArZCbRyaOZYTjoMkmx5uP4CAGKtM2lukePCdFeLWyx+WdzZaVOIv9ndsQ+rvYCcRu4auwRvoqStluopY/sSOuJgKqr4XfCTyEoCyARPu8ZiXB40vAK/BHwrPm7dMViE1KVGfCNqKViNoXk7i5Ix94i8LQPRYZOuQqEsV2hR7xs2u1r6ElPEoxWOl03+u3NOgqsaXIjoxPWI2f6GlHjn5oM6qHmQvOaEdNuGZnZIwruY8zkhdjp8XK+XKh/zjtfxV1EqTtCxiNJ/BpmffdYzlzZZ20CCM5MfOpAVu4MZSYZgOtBD1Kf+Fe4fcqaQXhCqLJu1KyQmyN/76Ukz1Ao94NFXhOmJDB3c2eG/pt/U22+E48FdeS7f0UlK/pjvd3b6wWuqEchUilsMz18xsnRFskgwPU=
 script:
   - pub build
 after_success:
   - ./deploy-gh-pages.sh
+
