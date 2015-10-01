@@ -1,0 +1,11 @@
+language: dart
+dart:
+  - stable
+env:
+  global:
+    - GH_REF: github.com/mvdavid7/five-bomber.git
+    - secure: "ChxFXajf6Bwut7d9sQc23+Ln7eoGRYRVDA5xGoAM7rIRgEJC9u3AhVbWXCm2eZV9LWmPZvLZ5GbvkSHT0zseLjLhbqn1Yxh09L3XdXWFGaWCNgmY/EAYRYclfVh312NTtQydxnNusOMBtE6sZfTnI+E2CCrjszYaL/CutSaFAzQ="
+script:
+  - pub build
+after_success:
+  - ./deploy-gh-pages.sh
