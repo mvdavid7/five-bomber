@@ -13,6 +13,7 @@ class Hydra {
   WebSocket ws = null;
   String _realtimeConnectionId = null;
   RtMessageCallback onRtMessage = null;
+  String rtCluster = null;
 
   Hydra(var client) {
     _client = client;
@@ -33,6 +34,7 @@ class Hydra {
           JsObject account = response['data']['account'];
           Map realtime = JSON.decode(context['JSON'].callMethod('stringify', [response['data']['configuration']['realtime']]));
           Map clusters = realtime['servers'];
+          this.rtCluster = clusters.keys.first;
           Map servers = clusters[clusters.keys.first];
           Map server = servers[servers.keys.first];
           _realtimeConnect(server['ws'], account['id']);

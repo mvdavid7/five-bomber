@@ -129,7 +129,7 @@ class Game {
         this.match = null;
       }
 
-      hydraClient.put('matches/matchmaking/5-way/join', {}, (JsObject response) {
+      hydraClient.put('matches/matchmaking/5-way/join', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
         this._onMatchJoin(response);
         callback(response);
       });
@@ -204,7 +204,7 @@ class Game {
   }
 
   void _getMatches() {
-    hydraClient.put('matches/matchmaking/5-way', {}, (JsObject response) {
+    hydraClient.put('matches/matchmaking/5-way', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
       if (!response['hasError']) {
         List matches = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
         TableElement matchListHolder = querySelector('#matchlist');
@@ -215,7 +215,7 @@ class Game {
           name.text = existingMatch['id'];
           name.className = 'clickable';
           name.onClick.listen((e) {
-            hydraClient.put('matches/matchmaking/5-way/join/${existingMatch['id']}', {}, (JsObject response) {
+            hydraClient.put('matches/matchmaking/5-way/join/${existingMatch['id']}', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
               this._onMatchJoin(response);
             });
           });
