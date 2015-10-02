@@ -15,10 +15,16 @@ h1 {
 }
 
 .allgrid { margin: 0 auto; width: 800px; }
+#matchlist { margin: 0 auto; width: 800px; }
 #playercolumn { width: 50%; }
 #opponentcolumn { width: 50%; }
 .playergrid { border-spacing: 0px; margin: 0 auto; }
-.playergrid td { padding: 20px; border: 1px solid black; margin: 0px; }
+.playergrid td { padding: 20px; margin: 0px; border: 1px solid black; }
+.clickable { cursor: pointer; }
+.online { border: 1px solid black; }
+.online.opponent td { cursor: pointer; }
+.offline td { border: 1px solid red; }
+.hit { background-color: red; }
 
 .footer { clear: both; font-size: 11px; text-align: center; padding-top: 50px; }
 .footer a { color: #555; }
