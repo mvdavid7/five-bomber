@@ -9594,7 +9594,7 @@
       $isElement: 1,
       $isNode: 1,
       $isObject: 1,
-      "%": "HTMLAppletElement|HTMLBRElement|HTMLBaseElement|HTMLButtonElement|HTMLCanvasElement|HTMLContentElement|HTMLDListElement|HTMLDataListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFrameElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMenuElement|HTMLMenuItemElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPictureElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLShadowElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableDataCellElement|HTMLTableHeaderCellElement|HTMLTemplateElement|HTMLTextAreaElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement|PluginPlaceholderElement;HTMLElement"
+      "%": "HTMLAppletElement|HTMLBRElement|HTMLBaseElement|HTMLButtonElement|HTMLCanvasElement|HTMLContentElement|HTMLDListElement|HTMLDataListElement|HTMLDetailsElement|HTMLDirectoryElement|HTMLDivElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFrameElement|HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMarqueeElement|HTMLMenuElement|HTMLMenuItemElement|HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLOptGroupElement|HTMLOptionElement|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPictureElement|HTMLPreElement|HTMLProgressElement|HTMLQuoteElement|HTMLScriptElement|HTMLShadowElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement|HTMLTableCaptionElement|HTMLTableColElement|HTMLTemplateElement|HTMLTitleElement|HTMLTrackElement|HTMLUListElement|HTMLUnknownElement|PluginPlaceholderElement;HTMLElement"
     },
     AnchorElement: {
       "^": "HtmlElement;",
@@ -9762,7 +9762,7 @@
       }
     },
     Element: {
-      "^": "Node;",
+      "^": "Node;className}",
       get$children: function(receiver) {
         return new W._ChildrenElementList(receiver, receiver.children);
       },
@@ -9910,6 +9910,11 @@
     MidiPort: {
       "^": "EventTarget;",
       "%": "MIDIInput;MIDIPort"
+    },
+    MouseEvent: {
+      "^": "UIEvent;",
+      $isObject: 1,
+      "%": "DragEvent|MSPointerEvent|MouseEvent|PointerEvent|WheelEvent"
     },
     Navigator: {
       "^": "Interceptor;",
@@ -10084,8 +10089,19 @@
       "^": "Event;error=",
       "%": "SpeechRecognitionError"
     },
+    TableCellElement: {
+      "^": "HtmlElement;",
+      $isHtmlElement: 1,
+      $isElement: 1,
+      $isNode: 1,
+      $isObject: 1,
+      "%": "HTMLTableCellElement|HTMLTableDataCellElement|HTMLTableHeaderCellElement"
+    },
     TableElement: {
       "^": "HtmlElement;",
+      get$rows: function(receiver) {
+        return H.setRuntimeTypeInfo(new W._WrappedList(receiver.rows), [W.TableRowElement]);
+      },
       createTBody$0: function(receiver) {
         return this._createTBody$0(receiver);
       },
@@ -10104,17 +10120,31 @@
     },
     TableRowElement: {
       "^": "HtmlElement;",
-      insertCell$1: function(receiver, index) {
-        return receiver.insertCell(index);
+      get$cells: function(receiver) {
+        return H.setRuntimeTypeInfo(new W._WrappedList(receiver.cells), [W.TableCellElement]);
       },
+      addCell$0: function(receiver) {
+        return receiver.insertCell(-1);
+      },
+      $isHtmlElement: 1,
+      $isElement: 1,
+      $isNode: 1,
+      $isObject: 1,
       "%": "HTMLTableRowElement"
     },
     TableSectionElement: {
       "^": "HtmlElement;",
+      get$rows: function(receiver) {
+        return H.setRuntimeTypeInfo(new W._WrappedList(receiver.rows), [W.TableRowElement]);
+      },
       insertRow$1: function(receiver, index) {
         return receiver.insertRow(index);
       },
       "%": "HTMLTableSectionElement"
+    },
+    TextAreaElement: {
+      "^": "HtmlElement;rows=",
+      "%": "HTMLTextAreaElement"
     },
     TextEvent: {
       "^": "UIEvent;data=",
@@ -10122,7 +10152,7 @@
     },
     UIEvent: {
       "^": "Event;",
-      "%": "DragEvent|FocusEvent|KeyboardEvent|MSPointerEvent|MouseEvent|PointerEvent|SVGZoomEvent|TouchEvent|WheelEvent;UIEvent"
+      "%": "FocusEvent|KeyboardEvent|SVGZoomEvent|TouchEvent;UIEvent"
     },
     WebSocket: {
       "^": "EventTarget;",
@@ -10245,6 +10275,12 @@
       },
       forTarget$1: function(e) {
         return this.forTarget$2$useCapture(e, false);
+      },
+      forElement$2$useCapture: function(e, useCapture) {
+        return H.setRuntimeTypeInfo(new W._ElementEventStreamImpl(e, this._eventType, useCapture), [null]);
+      },
+      forElement$1: function(e) {
+        return this.forElement$2$useCapture(e, false);
       }
     },
     _EventStream: {
@@ -10261,6 +10297,9 @@
       listen$3$onDone$onError: function(onData, onDone, onError) {
         return this.listen$4$cancelOnError$onDone$onError(onData, null, onDone, onError);
       }
+    },
+    _ElementEventStreamImpl: {
+      "^": "_EventStream;_html$_target,_eventType,_useCapture"
     },
     _EventStreamSubscription: {
       "^": "StreamSubscription;_pauseCount,_html$_target,_eventType,_html$_onData,_useCapture",
@@ -10326,6 +10365,48 @@
       $isEfficientLength: 1,
       $isIterable: 1,
       $asIterable: null
+    },
+    _WrappedList: {
+      "^": "ListBase;_list",
+      get$iterator: function(_) {
+        return new W._WrappedIterator(J.get$iterator$ax(this._list));
+      },
+      get$length: function(_) {
+        return this._list.length;
+      },
+      add$1: function(_, element) {
+        J.add$1$ax(this._list, element);
+      },
+      $index: function(_, index) {
+        var t1 = this._list;
+        if (index >>> 0 !== index || index >= t1.length)
+          return H.ioore(t1, index);
+        return t1[index];
+      },
+      $indexSet: function(_, index, value) {
+        var t1 = this._list;
+        if (index >>> 0 !== index || index >= t1.length)
+          return H.ioore(t1, index);
+        t1[index] = value;
+      },
+      set$length: function(_, newLength) {
+        J.set$length$asx(this._list, newLength);
+      },
+      indexOf$2: function(_, element, start) {
+        return J.indexOf$2$asx(this._list, element, start);
+      },
+      indexOf$1: function($receiver, element) {
+        return this.indexOf$2($receiver, element, 0);
+      }
+    },
+    _WrappedIterator: {
+      "^": "Object;_html$_iterator",
+      moveNext$0: function() {
+        return this._html$_iterator.moveNext$0();
+      },
+      get$current: function() {
+        return this._html$_iterator._current;
+      }
     },
     FixedSizeListIterator: {
       "^": "Object;_array,_length,_position,_current",
@@ -11165,12 +11246,12 @@
   }, 1], ["game", "Game.dart",, Q, {
     "^": "",
     Game: {
-      "^": "Object;hydraClient,player,match,rtSessionAlias,isAuthenticated",
-      _renderGrid$3: function(holder, username, allowUsernameChange) {
-        var $name, t1, grid, y, row, t2, x;
+      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,isAuthenticated",
+      _renderGrid$4: function(holder, username, accountId, $self) {
+        var $name, t1, grid, t2, y, row, t3, x, cell, t4, t5, t6, t7, t8;
         $name = document.createElement("label", null);
         $name.textContent = username;
-        if (allowUsernameChange)
+        if ($self)
           ;
         t1 = J.getInterceptor$x(holder);
         t1.get$children(holder).add$1(0, $name);
@@ -11179,49 +11260,135 @@
         t1.get$children(holder).add$1(0, grid);
         t1 = J.getInterceptor$x(grid);
         t1.createTBody$0(grid);
-        for (y = 0; y < 4; ++y) {
+        for (t2 = !$self, y = 0; y < 4; ++y) {
           row = t1.insertRow$1(grid, -1);
-          for (t2 = J.getInterceptor$x(row), x = 0; x < 4; ++x)
-            t2.insertCell$1(row, 0).className = "empty";
+          for (t3 = J.getInterceptor$x(row), x = 0; x < 4; ++x) {
+            cell = t3.addCell$0(row);
+            cell.className = "empty" + ($self ? " opponent" : "");
+            if (t2) {
+              cell.toString;
+              t4 = C.EventStreamProvider_click.forElement$1(cell);
+              t5 = t4._eventType;
+              t6 = t4._useCapture;
+              t7 = new W._EventStreamSubscription(0, t4._html$_target, t5, W._wrapZone(new Q.Game__renderGrid_closure(this, accountId, y, x)), t6);
+              t7.$builtinTypeInfo = [H.getTypeArgumentByIndex(t4, 0)];
+              t4 = t7._html$_onData;
+              t8 = t4 != null;
+              if (t8 && t7._pauseCount <= 0) {
+                t7 = t7._html$_target;
+                t7.toString;
+                if (t8)
+                  J._addEventListener$3$x(t7, t5, t4, t6);
+              }
+            }
+          }
+        }
+        return grid;
+      },
+      _onMatchJoin$1: function(response) {
+        var t1, playerHolder, $name, currentPlayers, allPlayers, t2, t3, playerId, t4, player, t5, message;
+        t1 = J.getInterceptor$asx(response);
+        if (t1.$index(response, "hasError") !== true) {
+          this.match = C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [t1.$index(response, "data")]));
+          playerHolder = document.querySelector("#playercolumn");
+          t1 = J.getInterceptor$x(playerHolder);
+          t1.get$children(playerHolder).clear$0(0);
+          $name = document.createElement("label", null);
+          $name.textContent = J.$index$asx(this.match, "id");
+          t1.get$children(playerHolder).add$1(0, $name);
+          t1.get$children(playerHolder).add$1(0, document.createElement("br", null));
+          t1 = this.player;
+          t1 = this._renderGrid$4(playerHolder, t1.username, J.$index$asx(t1.account, "id"), true);
+          this.grid = t1;
+          t1.className = "playergrid online";
+          J.get$children$x(document.querySelector("#opponentcolumn")).clear$0(0);
+          t1 = this.grids;
+          t1.clear$0(0);
+          currentPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "current");
+          allPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "all");
+          for (t2 = J.get$iterator$ax(currentPlayers), t3 = J.getInterceptor$ax(allPlayers); t2.moveNext$0();) {
+            playerId = t2.get$current();
+            if (!J.$eq$(playerId, J.$index$asx(this.player.account, "id")))
+              for (t4 = t3.get$iterator(allPlayers); t4.moveNext$0();) {
+                player = t4.get$current();
+                t5 = J.getInterceptor$asx(player);
+                if (J.$eq$(t5.$index(player, "account_id"), playerId)) {
+                  t1.$indexSet(0, playerId, this._renderGrid$4(document.querySelector("#opponentcolumn"), J.$index$asx(t5.$index(player, "identity"), "username"), t5.$index(player, "account_id"), false));
+                  J.set$className$x(t1.$index(0, playerId), "playergrid offline");
+                  break;
+                }
+              }
+          }
+          message = P.LinkedHashMap__makeLiteral(["cmd", "join", "payload", P.LinkedHashMap__makeLiteral(["type", "match", "session", J.$index$asx(this.match, "id")])]);
+          this.hydraClient.wsSend$1(message);
         }
       },
       findMatch$1: function(callback) {
-        var message, playerHolder;
+        var message;
         if (this.isAuthenticated) {
           if (this.match != null) {
             message = P.LinkedHashMap__makeLiteral(["cmd", "leave", "payload", P.LinkedHashMap__makeLiteral(["session", this.rtSessionAlias])]);
             this.hydraClient.wsSend$1(message);
             this.match = null;
           }
-          playerHolder = document.querySelector("#playercolumn");
-          J.get$children$x(playerHolder).clear$0(0);
-          this._renderGrid$3(playerHolder, this.player.username, true);
-          J.get$children$x(document.querySelector("#opponentcolumn")).clear$0(0);
           this.hydraClient._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game_findMatch_closure(this, callback));
         } else
           this.hydraLogin$2(P.LinkedHashMap__makeLiteral(["anonymous", true]), new Q.Game_findMatch_closure0(this, callback));
       },
       _onRtMessage$2: [function(cmd, payload) {
-        var t1, player, t2;
+        var t1, t2, player, t3, data, playerId, pos, x, y;
         P.print(payload);
         t1 = J.getInterceptor(cmd);
         if (t1.$eq(cmd, "join")) {
           t1 = J.getInterceptor$asx(payload);
           if (t1.$index(payload, "success") === true) {
             this.rtSessionAlias = t1.$index(payload, "sessionAlias");
-            for (t1 = J.get$iterator$ax(J.$index$asx(t1.$index(payload, "data"), "players")); t1.moveNext$0();) {
+            for (t1 = J.get$iterator$ax(J.$index$asx(t1.$index(payload, "data"), "players")), t2 = this.grids; t1.moveNext$0();) {
               player = t1.get$current();
-              t2 = J.getInterceptor$asx(player);
-              if (!J.$eq$(t2.$index(player, "id"), J.$index$asx(this.player.account, "id")))
-                this._renderGrid$3(document.querySelector("#opponentcolumn"), J.$index$asx(t2.$index(player, "identity"), "username"), false);
+              t3 = J.getInterceptor$asx(player);
+              if (!J.$eq$(t3.$index(player, "id"), J.$index$asx(this.player.account, "id")) && t2.$index(0, t3.$index(player, "id")) != null)
+                J.set$className$x(t2.$index(0, t3.$index(player, "id")), "playergrid online");
             }
           }
-        } else if (t1.$eq(cmd, "player-joined"))
-          this._renderGrid$3(document.querySelector("#opponentcolumn"), J.$index$asx(J.$index$asx(J.$index$asx(payload, "data"), "identity"), "username"), false);
-        else if (t1.$eq(cmd, "send-simulation"))
+        } else if (t1.$eq(cmd, "player-joined")) {
+          t1 = J.getInterceptor$asx(payload);
+          if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias))
+            this.grids.$indexSet(0, t1.$index(payload, "player"), this._renderGrid$4(document.querySelector("#opponentcolumn"), J.$index$asx(J.$index$asx(t1.$index(payload, "data"), "identity"), "username"), t1.$index(payload, "player"), false));
+        } else if (t1.$eq(cmd, "send-simulation")) {
           if (J.$eq$(J.$index$asx(payload, "alias"), this.rtSessionAlias))
             P.print(payload);
+        } else if (t1.$eq(cmd, "send")) {
+          t1 = J.getInterceptor$asx(payload);
+          if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias)) {
+            data = C.JsonCodec_null_null.decode$1(t1.$index(payload, "payload"));
+            t1 = J.getInterceptor$asx(data);
+            if (J.$eq$(t1.$index(data, "type"), "shot-fired")) {
+              playerId = t1.$index(data, "player");
+              pos = t1.$index(data, "pos");
+              t1 = J.getInterceptor$asx(pos);
+              x = t1.$index(pos, "x");
+              y = t1.$index(pos, "y");
+              if (J.$eq$(playerId, J.$index$asx(this.player.account, "id"))) {
+                t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(this.grid), y))._list;
+                if (x >>> 0 !== x || x >= t1.length)
+                  return H.ioore(t1, x);
+                J.set$className$x(t1[x], "hit");
+              } else {
+                t1 = this.grids;
+                if (t1.$index(0, playerId) != null) {
+                  t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(t1.$index(0, playerId)), y))._list;
+                  if (x >>> 0 !== x || x >= t1.length)
+                    return H.ioore(t1, x);
+                  J.set$className$x(t1[x], "hit");
+                }
+              }
+            }
+          }
+        }
       }, "call$2", "get$_onRtMessage", 4, 0, 25],
+      _getMatches$0: function() {
+        this.hydraClient._request$4("matches/matchmaking/5-way", "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game__getMatches_closure(this));
+      },
       hydraLogin$2: function(auth, callback) {
         this.hydraClient.startupWithOptions$3(auth, ["profile", "account", "configuration"], new Q.Game_hydraLogin_closure(this, callback));
       },
@@ -11243,7 +11410,7 @@
           this.hydraLogin$2(authToken, new Q.Game_closure());
       },
       static: {Game$: function(client) {
-          var t1 = new Q.Game(null, null, null, null, false);
+          var t1 = new Q.Game(null, null, null, null, null, P.LinkedHashMap_LinkedHashMap(null, null, null, null, null), false);
           t1.Game$1(client);
           return t1;
         }}
@@ -11255,18 +11422,19 @@
           P.print("Invalid saved token, will have to create new account");
       }
     },
+    Game__renderGrid_closure: {
+      "^": "Closure:1;_game$_captured_this_0,_captured_accountId_1,_captured_y_2,_captured_x_3",
+      call$1: [function(e) {
+        var t1, message;
+        t1 = this._game$_captured_this_0;
+        message = P.LinkedHashMap__makeLiteral(["cmd", "send-all", "payload", P.LinkedHashMap__makeLiteral(["alias", t1.rtSessionAlias, "reliable", true, "type", "string", "payload", C.JsonCodec_null_null.encode$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_3, "y", this._captured_y_2]), "player", this._captured_accountId_1]))])]);
+        t1.hydraClient.wsSend$1(message);
+      }, null, null, 2, 0, null, 0, "call"]
+    },
     Game_findMatch_closure: {
       "^": "Closure:3;_game$_captured_this_0,_game$_captured_callback_1",
       call$1: function(response) {
-        var t1, t2, message;
-        t1 = J.getInterceptor$asx(response);
-        if (t1.$index(response, "hasError") !== true) {
-          t2 = this._game$_captured_this_0;
-          t1 = C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [t1.$index(response, "data")]));
-          t2.match = t1;
-          message = P.LinkedHashMap__makeLiteral(["cmd", "join", "payload", P.LinkedHashMap__makeLiteral(["type", "match", "session", J.$index$asx(t1, "id")])]);
-          t2.hydraClient.wsSend$1(message);
-        }
+        this._game$_captured_this_0._onMatchJoin$1(response);
         this._game$_captured_callback_1.call$1(response);
       }
     },
@@ -11278,6 +11446,58 @@
           this._game$_captured_this_2.findMatch$1(t1);
         else
           t1.call$1(response);
+      }
+    },
+    Game__getMatches_closure: {
+      "^": "Closure:3;_game$_captured_this_0",
+      call$1: function(response) {
+        var t1, matches, matchListHolder, t2, t3, existingMatch, row, t4, $name, t5, t6, t7, t8, t9, t10, currentPlayers;
+        t1 = J.getInterceptor$asx(response);
+        if (t1.$index(response, "hasError") !== true) {
+          matches = C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [t1.$index(response, "data")]));
+          matchListHolder = document.querySelector("#matchlist");
+          t1 = J.getInterceptor$x(matchListHolder);
+          t1.createTBody$0(matchListHolder);
+          for (t2 = J.get$iterator$ax(matches), t3 = this._game$_captured_this_0; t2.moveNext$0();) {
+            existingMatch = t2.get$current();
+            row = t1.insertRow$1(matchListHolder, -1);
+            t4 = J.getInterceptor$x(row);
+            $name = t4.addCell$0(row);
+            t5 = J.getInterceptor$asx(existingMatch);
+            $name.textContent = t5.$index(existingMatch, "id");
+            $name.className = "clickable";
+            $name.toString;
+            t6 = C.EventStreamProvider_click.forElement$1($name);
+            t7 = t6._eventType;
+            t8 = t6._useCapture;
+            t9 = new W._EventStreamSubscription(0, t6._html$_target, t7, W._wrapZone(new Q.Game__getMatches__closure(t3, existingMatch)), t8);
+            t9.$builtinTypeInfo = [H.getTypeArgumentByIndex(t6, 0)];
+            t6 = t9._html$_onData;
+            t10 = t6 != null;
+            if (t10 && t9._pauseCount <= 0) {
+              t9 = t9._html$_target;
+              t9.toString;
+              if (t10)
+                J._addEventListener$3$x(t9, t7, t6, t8);
+            }
+            currentPlayers = J.$index$asx(t5.$index(existingMatch, "players"), "current");
+            t4.addCell$0(row).textContent = H.S(J.get$length$asx(currentPlayers));
+            t4.addCell$0(row).textContent = t5.$index(existingMatch, "created_at");
+          }
+        }
+      }
+    },
+    Game__getMatches__closure: {
+      "^": "Closure:1;_game$_captured_this_1,_captured_existingMatch_2",
+      call$1: [function(e) {
+        var t1 = this._game$_captured_this_1;
+        t1.hydraClient._request$4("matches/matchmaking/5-way/join/" + H.S(J.$index$asx(this._captured_existingMatch_2, "id")), "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game__getMatches___closure(t1));
+      }, null, null, 2, 0, null, 0, "call"]
+    },
+    Game__getMatches___closure: {
+      "^": "Closure:3;_captured_this_3",
+      call$1: function(response) {
+        this._captured_this_3._onMatchJoin$1(response);
       }
     },
     Game_hydraLogin_closure: {
@@ -11300,6 +11520,7 @@
           t3.username = J.$index$asx(J.$index$asx(t5, "identity"), "username");
           t2.player = t3;
           t2.hydraClient.onRtMessage = t2.get$_onRtMessage();
+          t2._getMatches$0();
         }
         this._game$_captured_callback_1.call$1(response);
       }
@@ -11696,8 +11917,17 @@
       return receiver;
     return J.getNativeInterceptor(receiver);
   };
+  J.set$className$x = function(receiver, value) {
+    return J.getInterceptor$x(receiver).set$className(receiver, value);
+  };
+  J.set$length$asx = function(receiver, value) {
+    return J.getInterceptor$asx(receiver).set$length(receiver, value);
+  };
   J.set$returnValue$x = function(receiver, value) {
     return J.getInterceptor$x(receiver).set$returnValue(receiver, value);
+  };
+  J.get$cells$x = function(receiver) {
+    return J.getInterceptor$x(receiver).get$cells(receiver);
   };
   J.get$children$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$children(receiver);
@@ -11725,6 +11955,9 @@
   };
   J.get$result$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$result(receiver);
+  };
+  J.get$rows$x = function(receiver) {
+    return J.getInterceptor$x(receiver).get$rows(receiver);
   };
   J.$add$ns = function(receiver, a0) {
     if (typeof receiver == "number" && typeof a0 == "number")
@@ -11804,6 +12037,9 @@
   J.forEach$1$ax = function(receiver, a0) {
     return J.getInterceptor$ax(receiver).forEach$1(receiver, a0);
   };
+  J.indexOf$2$asx = function(receiver, a0, a1) {
+    return J.getInterceptor$asx(receiver).indexOf$2(receiver, a0, a1);
+  };
   J.map$1$ax = function(receiver, a0) {
     return J.getInterceptor$ax(receiver).map$1(receiver, a0);
   };
@@ -11863,6 +12099,7 @@
   C.C__DelayedDone = new P._DelayedDone();
   C.C__RootZone = new P._RootZone();
   C.Duration_0 = new P.Duration(0);
+  C.EventStreamProvider_click = new W.EventStreamProvider("click");
   C.EventStreamProvider_close = new W.EventStreamProvider("close");
   C.EventStreamProvider_error = new W.EventStreamProvider("error");
   C.EventStreamProvider_message = new W.EventStreamProvider("message");
