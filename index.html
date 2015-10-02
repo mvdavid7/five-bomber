@@ -7,6 +7,7 @@ Copyright (c) 2015, David Andrade
 <html>
   <head>
     <title>Five Bomber</title>
+    <link rel="stylesheet" type="text/css" href="five-bombers.css">
     <script src="thirdparty/hydra-sdk.js"></script>
     <script> // Facebook login scripts
       function fbLogin() {
@@ -62,13 +63,19 @@ Copyright (c) 2015, David Andrade
 
     <h1>Five Bomber</h1>
 
+    <a href="#" onclick="findMatch()">Find Match</a>
+
+    <div class="main">
+
+    </div>
+
     <div class="footer">
       Copyright 2015 David Andrade. Source on <a href="http://github.com/mvdavid7/five-bomber" target="_blank">GitHub</a>.
       <br/>
       Powered by <a href="http://hydra.agoragames.com/" target="_blank">Hydra</a>.
     </div>
 
-    <script type="application/dart" src="text-adventure.dart"></script>
+    <script type="application/dart" src="five-bombers.dart"></script>
     <script src="packages/browser/dart.js"></script>
   </body>
 </html>

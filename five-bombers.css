@@ -1,0 +1,18 @@
+/* Copyright (c) 2014, David Andrade */
+
+body {
+  font-family: 'Consolas', monospace;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.2em;
+  margin: 15px;
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+  padding: 10px;
+}
+
+.footer { clear: both; font-size: 11px; text-align: center; padding-top: 50px; }
+.footer a { color: #555; }
