@@ -14,5 +14,11 @@ h1 {
   padding: 10px;
 }
 
+.allgrid { margin: 0 auto; width: 800px; }
+#playercolumn { width: 50%; }
+#opponentcolumn { width: 50%; }
+.playergrid { border-spacing: 0px; margin: 0 auto; }
+.playergrid td { padding: 20px; border: 1px solid black; margin: 0px; }
+
 .footer { clear: both; font-size: 11px; text-align: center; padding-top: 50px; }
 .footer a { color: #555; }

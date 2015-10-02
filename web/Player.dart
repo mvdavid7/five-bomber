@@ -4,13 +4,13 @@ import 'dart:js';
 
 class FiveBomberPlayer {
   String username = null;
-  JsObject _account = null;
-  JsObject _profile = null;
+  JsObject account = null;
+  JsObject profile = null;
 
   FiveBomberPlayer(JsObject loginData) {
-    _account = loginData['account'];
-    _profile = loginData['profile'];
+    account = loginData['account'];
+    profile = loginData['profile'];
 
-    username = _account['identity']['username'];
+    username = account['identity']['username'];
   }
 }

@@ -6,11 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 
 typedef void HydraCallback(JsObject response);
+typedef void RtMessageCallback(String, Map);
 
 class Hydra {
   var _client = null;
   WebSocket ws = null;
   String _realtimeConnectionId = null;
+  RtMessageCallback onRtMessage = null;
 
   Hydra(var client) {
     _client = client;
@@ -38,6 +40,7 @@ class Hydra {
           print('Not connecting to realtime: missing configuration');
         }
       }
+      callback(response);
     });
     _client.callMethod('startupWithOptions', [jsAuth, jsOptions, jsCallback]);
   }
@@ -99,7 +102,7 @@ class Hydra {
         'cmd': 'auth',
         'payload': authMessage
       };
-      _send(message);
+      wsSend(message);
     });
 
     ws.onClose.listen((e) {
@@ -120,24 +123,28 @@ class Hydra {
       if(cmd == 'auth') {
         if(message['payload']['success']) {
           _realtimeConnectionId = message['payload']['connectionId'];
-          _ping();
+          _wsPing();
+        }
+      } else {
+        if(this.onRtMessage != null) {
+          this.onRtMessage(cmd, message['payload']);
         }
       }
     });
   }
 
-  void _send(Map message) {
+  void wsSend(Map message) {
     var msgString = JSON.encode(message);
     print(msgString);
     ws.send(msgString);
   }
 
-  void _ping() {
+  void _wsPing() {
     Map message = {
       'cmd': 'ping',
       'payload': {}
     };
-    _send(message);
-    new Timer(new Duration(milliseconds: 15000), () => this._ping());
+    wsSend(message);
+    new Timer(new Duration(milliseconds: 15000), () => this._wsPing());
   }
 }
