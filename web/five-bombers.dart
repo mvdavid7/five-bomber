@@ -16,7 +16,7 @@ void printJsObject(var jsObj) {
 
 void main() {
   Hydra client = new Hydra(new JsObject(context['Client']));
-  client.init('https://api.hydra.agoragames.com', '1d30b465276743b99647809499a5374d');
+  client.init(Uri.base.queryParameters['hydra_url'], Uri.base.queryParameters['hydra_apikey']);
 
   Game game = new Game(client);
 

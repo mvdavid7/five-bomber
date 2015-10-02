@@ -3,12 +3,14 @@ library hydra;
 import 'dart:html';
 import 'dart:js';
 import 'dart:async';
+import 'dart:convert';
 
 typedef void HydraCallback(JsObject response);
 
 class Hydra {
   var _client = null;
   WebSocket ws = null;
+  String _realtimeConnectionId = null;
 
   Hydra(var client) {
     _client = client;
@@ -26,11 +28,12 @@ class Hydra {
     JsFunction jsCallback = _getJSCallback((JsObject response) {
       if(!response['hasError']) {
         if(response['data']['configuration'] != null) {
-          JsObject realtime = response['data']['configuration']['realtime'];
-          String cluster = realtime['default-cluster'];
-          JsObject server = realtime['servers'][cluster]['ny2-do-prod-realtime-4/1'];
-          String wsAddress = server['ws'];
-          _realtimeConnect(wsAddress);
+          JsObject account = response['data']['account'];
+          Map realtime = JSON.decode(context['JSON'].callMethod('stringify', [response['data']['configuration']['realtime']]));
+          Map clusters = realtime['servers'];
+          Map servers = clusters[clusters.keys.first];
+          Map server = servers[servers.keys.first];
+          _realtimeConnect(server['ws'], account['id']);
         } else {
           print('Not connecting to realtime: missing configuration');
         }
@@ -71,20 +74,32 @@ class Hydra {
     });
   }
 
-  void _realtimeConnect(String wsAddress) {
+  void _realtimeConnect(String wsAddress, String accountId) {
     var reconnectScheduled = false;
     ws = new WebSocket(wsAddress);
 
     void scheduleReconnect() {
       if (!reconnectScheduled) {
-        new Timer(new Duration(milliseconds: 1000), () => _realtimeConnect(wsAddress));
+        new Timer(new Duration(milliseconds: 1000), () => _realtimeConnect(wsAddress, accountId));
       }
       reconnectScheduled = true;
     }
 
     ws.onOpen.listen((e) {
       print('Realtime: Connected');
-      ws.send('Hello from Dart!');
+      Map authMessage = {
+        'apiKey': _client['apiKey'],
+        'accessToken': _client['accessToken'],
+        'accountId': accountId,
+        'data': {
+          'connection': _realtimeConnectionId
+        }
+      };
+      Map message = {
+        'cmd': 'auth',
+        'payload': authMessage
+      };
+      _send(message);
     });
 
     ws.onClose.listen((e) {
@@ -98,7 +113,31 @@ class Hydra {
     });
 
     ws.onMessage.listen((MessageEvent e) {
-      print('Realtime: Received message: ${e.data}');
+      Map message = JSON.decode(e.data);
+      String cmd = message['cmd'];
+      print('Realtime: Received message: ${cmd}');
+
+      if(cmd == 'auth') {
+        if(message['payload']['success']) {
+          _realtimeConnectionId = message['payload']['connectionId'];
+          _ping();
+        }
+      }
     });
+  }
+
+  void _send(Map message) {
+    var msgString = JSON.encode(message);
+    print(msgString);
+    ws.send(msgString);
+  }
+
+  void _ping() {
+    Map message = {
+      'cmd': 'ping',
+      'payload': {}
+    };
+    _send(message);
+    new Timer(new Duration(milliseconds: 15000), () => this._ping());
   }
 }
