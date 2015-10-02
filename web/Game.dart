@@ -63,7 +63,7 @@ class Game {
   bool isAuthenticated = false;
 
   void hydraLogin(var auth, HydraCallback callback) {
-    hydraClient.startupWithOptions(auth, ['profile', 'account'], (JsObject response){
+    hydraClient.startupWithOptions(auth, ['profile', 'account', 'configuration'], (JsObject response){
       if (!response['hasError']) {
         isAuthenticated = true;
         saveAuthToken(hydraClient['authToken']);
