@@ -11200,7 +11200,7 @@
       var t1, t2, client, game;
       t1 = $.$get$context();
       t2 = P.JsObject_JsObject(J.$index$asx(t1, "Client"), null);
-      client = new Q.Hydra(null, null, null, null);
+      client = new Q.Hydra(null, null, null, null, null);
       client._client = t2;
       t2.callMethod$2("init", [J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_url"), J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_apikey")]);
       game = Q.Game$(client);
@@ -11324,14 +11324,15 @@
         }
       },
       findMatch$1: function(callback) {
-        var message;
+        var message, t1;
         if (this.isAuthenticated) {
           if (this.match != null) {
             message = P.LinkedHashMap__makeLiteral(["cmd", "leave", "payload", P.LinkedHashMap__makeLiteral(["session", this.rtSessionAlias])]);
             this.hydraClient.wsSend$1(message);
             this.match = null;
           }
-          this.hydraClient._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game_findMatch_closure(this, callback));
+          t1 = this.hydraClient;
+          t1._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.rtCluster]), new Q.Game_findMatch_closure(this, callback));
         } else
           this.hydraLogin$2(P.LinkedHashMap__makeLiteral(["anonymous", true]), new Q.Game_findMatch_closure0(this, callback));
       },
@@ -11387,7 +11388,8 @@
         }
       }, "call$2", "get$_onRtMessage", 4, 0, 25],
       _getMatches$0: function() {
-        this.hydraClient._request$4("matches/matchmaking/5-way", "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game__getMatches_closure(this));
+        var t1 = this.hydraClient;
+        t1._request$4("matches/matchmaking/5-way", "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.rtCluster]), new Q.Game__getMatches_closure(this));
       },
       hydraLogin$2: function(auth, callback) {
         this.hydraClient.startupWithOptions$3(auth, ["profile", "account", "configuration"], new Q.Game_hydraLogin_closure(this, callback));
@@ -11491,7 +11493,7 @@
       "^": "Closure:1;_game$_captured_this_1,_captured_existingMatch_2",
       call$1: [function(e) {
         var t1 = this._game$_captured_this_1;
-        t1.hydraClient._request$4("matches/matchmaking/5-way/join/" + H.S(J.$index$asx(this._captured_existingMatch_2, "id")), "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game__getMatches___closure(t1));
+        t1.hydraClient._request$4("matches/matchmaking/5-way/join/" + H.S(J.$index$asx(this._captured_existingMatch_2, "id")), "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.hydraClient.rtCluster]), new Q.Game__getMatches___closure(t1));
       }, null, null, 2, 0, null, 0, "call"]
     },
     Game__getMatches___closure: {
@@ -11683,7 +11685,7 @@
   }], ["hydra", "Hydra.dart",, Q, {
     "^": "",
     Hydra: {
-      "^": "Object;_client,ws,_realtimeConnectionId,onRtMessage",
+      "^": "Object;_client,ws,_realtimeConnectionId,onRtMessage,rtCluster",
       $index: function(_, attr) {
         return J.$index$asx(this._client, attr);
       },
@@ -11741,16 +11743,19 @@
     Hydra_startupWithOptions_closure: {
       "^": "Closure:3;_captured_this_0,_captured_callback_1",
       call$1: function(response) {
-        var t1, account, clusters, servers;
+        var t1, account, clusters, t2, servers;
         t1 = J.getInterceptor$asx(response);
         if (t1.$index(response, "hasError") !== true)
           if (J.$index$asx(t1.$index(response, "data"), "configuration") != null) {
             account = J.$index$asx(t1.$index(response, "data"), "account");
             clusters = J.$index$asx(C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [J.$index$asx(J.$index$asx(t1.$index(response, "data"), "configuration"), "realtime")])), "servers");
-            t1 = clusters.get$keys();
-            servers = J.$index$asx(clusters, t1.get$first(t1));
-            t1 = servers.get$keys();
-            this._captured_this_0._realtimeConnect$2(J.$index$asx(J.$index$asx(servers, t1.get$first(t1)), "ws"), J.$index$asx(account, "id"));
+            t1 = this._captured_this_0;
+            t2 = clusters.get$keys();
+            t1.rtCluster = t2.get$first(t2);
+            t2 = clusters.get$keys();
+            servers = J.$index$asx(clusters, t2.get$first(t2));
+            t2 = servers.get$keys();
+            t1._realtimeConnect$2(J.$index$asx(J.$index$asx(servers, t2.get$first(t2)), "ws"), J.$index$asx(account, "id"));
           } else
             P.print("Not connecting to realtime: missing configuration");
         this._captured_callback_1.call$1(response);
