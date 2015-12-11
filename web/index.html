@@ -6,7 +6,7 @@ Copyright (c) 2015, David Andrade
 
 <html>
   <head>
-    <title>Five Bomber</title>
+    <title>Five Bombers</title>
     <link rel="stylesheet" type="text/css" href="five-bombers.css">
     <script src="thirdparty/hydra-sdk.js"></script>
     <script> // Facebook login scripts
@@ -61,16 +61,38 @@ Copyright (c) 2015, David Andrade
   <body>
     <div id="fb-root"></div>
 
-    <h1>Five Bomber</h1>
+    <h1>Five Bombers</h1>
 
-    <a onclick="findMatch()" class="clickable">Find Match</a>
+    <ul class="menu">
+      <li><a onclick="randomMatch()" class="clickable">Random Match</a></li>
+      <li><a onclick="listMatches()" class="clickable">List Matches</a></li>
+    </ul>
 
     <div class="main">
-      <table class="allgrid">
-        <tr>
-          <td id="playercolumn">
+      <table id="controls">
+        <tr id="opponents">
+          <td id="opponent1" class="playerspot empty">
           </td>
-          <td id="opponentcolumn">
+          <td id="opponent2" class="playerspot empty">
+          </td>
+          <td id="clock">
+            30
+          </td>
+          <td id="opponent3" class="playerspot empty">
+          </td>
+          <td id="opponent4" class="playerspot empty">
+          </td>
+        </tr>
+        <tr id="player">
+          <td class="empty">
+          </td>
+          <td class="empty">
+          </td>
+          <td id="self">
+          </td>
+          <td class="empty">
+          </td>
+          <td class="empty">
           </td>
         </tr>
       </table>

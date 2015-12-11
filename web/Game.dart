@@ -39,7 +39,7 @@ class Game {
     holder.children.add(name);
 
     TableElement grid = new TableElement();
-    grid.className = 'playergrid';
+    grid.classes.add('playergrid');
     holder.children.add(grid);
 
     grid.createTBody();
@@ -203,7 +203,7 @@ class Game {
     }
   }
 
-  void _getMatches() {
+  void listMatches(HydraCallback callback) {
     hydraClient.put('matches/matchmaking/5-way', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
       if (!response['hasError']) {
         List matches = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
@@ -228,6 +228,8 @@ class Game {
           created.text = existingMatch['created_at'];
         }
       }
+
+      callback(response);
     });
   }
 
@@ -239,8 +241,6 @@ class Game {
 
         this.player = new FiveBomberPlayer(response['data']);
         this.hydraClient.onRtMessage = this._onRtMessage;
-
-        this._getMatches();
       }
 
       callback(response);

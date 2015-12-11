@@ -14,11 +14,19 @@ h1 {
   padding: 10px;
 }
 
-.allgrid { margin: 0 auto; width: 800px; }
+.menu { list-style-type: none; padding: 0; }
+.menu li { padding-top: 20px; }
+
+#controls { margin: 0 auto; width: 800px; height: 320px; }
 #matchlist { margin: 0 auto; width: 800px; }
-#playercolumn { width: 50%; }
-#opponentcolumn { width: 50%; }
-.playergrid { border-spacing: 0px; margin: 0 auto; }
+
+#opponents { width: 100%; }
+#player { width: 100%; }
+
+#opponents .playerspot { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
+#opponents .empty { background-color: #F0F0F0; }
+
+.playergrid { border-spacing: 0px; margin: 0 auto; width: 100%; padding: 0; }
 .playergrid td { padding: 20px; margin: 0px; border: 1px solid black; }
 .clickable { cursor: pointer; }
 .online { border: 1px solid black; }

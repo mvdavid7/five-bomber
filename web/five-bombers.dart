@@ -25,8 +25,14 @@ void main() {
       e.returnValue = "You are in a match. If you quit, you will forfeit.";
   });
 
-  context['findMatch'] = () {
+  context['randomMatch'] = () {
     game.findMatch((JsObject) {
+
+    });
+  };
+
+  context['listMatches'] = () {
+    game.listMatches((JsObject) {
 
     });
   };
