@@ -113,6 +113,17 @@ class Game {
     return this.myGrid[y][x];
   }
 
+  void _markPlayerInMatch(Element opponentHolder) {
+    opponentHolder.classes.remove('open');
+    opponentHolder.classes.add('taken');
+  }
+
+  void _markPlayerOnline(Element opponentGrid) {
+    _markPlayerInMatch(opponentGrid.parent);
+    opponentGrid.classes.remove('offline');
+    opponentGrid.classes.add('online');
+  }
+
   void onSetup() {
     this._setState(State.Setup);
     this._startTimer(20);
@@ -193,8 +204,7 @@ class Game {
           for(Map player in allPlayers) {
             if(player['account_id'] == playerId) {
               Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
-              opponentHolder.classes.remove('empty');
-              opponentHolder.classes.add('taken');
+              _markPlayerInMatch(opponentHolder);
               this.grids[playerId] = _renderGrid(opponentHolder, player['identity']['username'], player['account_id'], false);
               this.grids[playerId].className = 'playergrid offline';
               break;
@@ -280,18 +290,17 @@ class Game {
         List players = payload['data']['players'];
         for(Map player in players) {
           if(player['id'] != this.player.account['id'] && this.grids[player['id']] != null)
-            this.grids[player['id']].className = 'playergrid online';
+            _markPlayerOnline(this.grids[player['id']]);
         }
       }
     } else if(cmd == 'player-joined') {
       if(payload['alias'] == this.rtSessionAlias) {
         String player = payload['player'];
-        if(this.grids.containsKey(player)) {
-          this.grids[player].className = 'playergrid online';
-        } else {
+        if(!this.grids.containsKey(player)) {
           Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
           this.grids[payload['player']] = _renderGrid(opponentHolder, payload['data']['identity']['username'], payload['player'], false);
         }
+        _markPlayerOnline(this.grids[player]);
       }
     } else if(cmd == 'send-simulation') {
       if(payload['alias'] == this.rtSessionAlias) {
@@ -308,8 +317,21 @@ class Game {
           if(playerId == this.player.account['id']) {
             if(this._getSpotState(x, y) == SpotState.Piece) {
               this._setSpotState(x, y, SpotState.Hit);
+              this._sendAllGameMessage({
+                'type': 'shot-hit',
+                'pos': {'x': x, 'y': y},
+                'player': playerId
+              });
             }
           } else if(this.grids[playerId] != null) {
+            this.grids[playerId].rows[y].cells[x].className = 'miss';
+          }
+        } else if(data['type'] == 'shot-hit') {
+          String playerId = data['player'];
+          Map pos = data['pos'];
+          int x = pos['x'];
+          int y = pos['y'];
+          if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'hit';
           }
         }

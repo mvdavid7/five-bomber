@@ -24,7 +24,7 @@ h1 {
 #player { width: 100%; }
 
 #opponents .playerspot { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
-#opponents .empty { background-color: #F0F0F0; }
+#opponents .open { background-color: #F0F0F0; }
 
 #player .blank { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 
@@ -40,9 +40,11 @@ h1 {
 .online { border: 1px solid black; }
 
 #self .setup td { cursor: pointer; }
+#opponents .playergrid .empty { cursor: pointer; }
 
 .offline td { border: 1px solid red; }
 
+.miss { background-color: #F0F0F0; }
 .piece { background-color: blue; }
 .hit { background-color: red; }
 
