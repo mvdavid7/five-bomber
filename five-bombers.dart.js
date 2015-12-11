@@ -6137,6 +6137,9 @@
     },
     _RootZone: {
       "^": "_Zone;",
+      get$parent: function(_) {
+        return;
+      },
       get$errorZone: function() {
         return this;
       },
@@ -9719,6 +9722,11 @@
       hash ^= hash >>> 11;
       return 536870911 & hash + ((16383 & hash) << 15 >>> 0);
     },
+    _convertNativeToDart_Window: function(win) {
+      if (win == null)
+        return;
+      return W._DOMWindowCrossFrame__createSafe(win);
+    },
     _wrapZone: function(callback) {
       var t1 = $.Zone__current;
       if (t1 === C.C__RootZone)
@@ -10147,7 +10155,7 @@
       }
     },
     Node: {
-      "^": "EventTarget;text:textContent}",
+      "^": "EventTarget;parent:parentElement=,text:textContent}",
       remove$0: function(receiver) {
         var t1 = receiver.parentNode;
         if (t1 != null)
@@ -10338,6 +10346,9 @@
     },
     Window: {
       "^": "EventTarget;",
+      get$parent: function(receiver) {
+        return W._convertNativeToDart_Window(receiver.parent);
+      },
       $isWindow: 1,
       $isInterceptor: 1,
       "%": "DOMWindow|Window"
@@ -10717,6 +10728,19 @@
       get$current: function() {
         return this._current;
       }
+    },
+    _DOMWindowCrossFrame: {
+      "^": "Object;_window",
+      get$parent: function(_) {
+        return W._DOMWindowCrossFrame__createSafe(this._window.parent);
+      },
+      $isInterceptor: 1,
+      static: {_DOMWindowCrossFrame__createSafe: function(w) {
+          if (w === window)
+            return w;
+          else
+            return new W._DOMWindowCrossFrame(w);
+        }}
     },
     _WrappedEvent: {
       "^": "Object;",
@@ -11638,6 +11662,16 @@
           return H.ioore(t1, x);
         J.set$className$x(t1[x], cls);
       },
+      _markPlayerOnline$1: function(opponentGrid) {
+        var t1, t2, t3;
+        t1 = J.getInterceptor$x(opponentGrid);
+        t2 = t1.get$parent(opponentGrid);
+        t3 = J.getInterceptor$x(t2);
+        t3.get$classes(t2).remove$1(0, "open");
+        t3.get$classes(t2).add$1(0, "taken");
+        t1.get$classes(opponentGrid).remove$1(0, "offline");
+        t1.get$classes(opponentGrid).add$1(0, "online");
+      },
       _renderGrid$4: function(holder, username, accountId, $self) {
         var $name, t1, grid, t2, y, row, x, cell, t3, t4, t5, t6;
         $name = C.HtmlDocument_methods.createElement$1(document, "label");
@@ -11699,7 +11733,7 @@
                   t4 = "#opponent" + (t1.get$length(t1) + 1);
                   opponentHolder = document.querySelector(t4);
                   t4 = J.getInterceptor$x(opponentHolder);
-                  t4.get$classes(opponentHolder).remove$1(0, "empty");
+                  t4.get$classes(opponentHolder).remove$1(0, "open");
                   t4.get$classes(opponentHolder).add$1(0, "taken");
                   t1.$indexSet(0, playerId, this._renderGrid$4(opponentHolder, J.$index$asx(t5.$index(player, "identity"), "username"), t5.$index(player, "account_id"), false));
                   J.set$className$x(t1.$index(0, playerId), "playergrid offline");
@@ -11732,7 +11766,7 @@
         this.hydraClient.wsSend$1(message);
       },
       _onRtMessage$2: [function(cmd, payload) {
-        var t1, t2, player, t3, opponentHolder, data, playerId, pos, x, y;
+        var t1, t2, player, t3, t4, t5, t6, opponentHolder, data, playerId, pos, x, y;
         P.print(payload);
         t1 = J.getInterceptor(cmd);
         if (t1.$eq(cmd, "join")) {
@@ -11742,8 +11776,16 @@
             for (t1 = J.get$iterator$ax(J.$index$asx(t1.$index(payload, "data"), "players")), t2 = this.grids; t1.moveNext$0();) {
               player = t1.get$current();
               t3 = J.getInterceptor$asx(player);
-              if (!J.$eq$(t3.$index(player, "id"), J.$index$asx(this.player.account, "id")) && t2.$index(0, t3.$index(player, "id")) != null)
-                J.set$className$x(t2.$index(0, t3.$index(player, "id")), "playergrid online");
+              if (!J.$eq$(t3.$index(player, "id"), J.$index$asx(this.player.account, "id")) && t2.$index(0, t3.$index(player, "id")) != null) {
+                t3 = t2.$index(0, t3.$index(player, "id"));
+                t4 = J.getInterceptor$x(t3);
+                t5 = t4.get$parent(t3);
+                t6 = J.getInterceptor$x(t5);
+                t6.get$classes(t5).remove$1(0, "open");
+                t6.get$classes(t5).add$1(0, "taken");
+                t4.get$classes(t3).remove$1(0, "offline");
+                t4.get$classes(t3).add$1(0, "online");
+              }
             }
           }
         } else if (t1.$eq(cmd, "player-joined")) {
@@ -11751,13 +11793,12 @@
           if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias)) {
             player = t1.$index(payload, "player");
             t2 = this.grids;
-            if (t2.containsKey$1(player))
-              J.set$className$x(t2.$index(0, player), "playergrid online");
-            else {
+            if (!t2.containsKey$1(player)) {
               t3 = "#opponent" + (t2.get$length(t2) + 1);
               opponentHolder = document.querySelector(t3);
               t2.$indexSet(0, t1.$index(payload, "player"), this._renderGrid$4(opponentHolder, J.$index$asx(J.$index$asx(t1.$index(payload, "data"), "identity"), "username"), t1.$index(payload, "player"), false));
             }
+            this._markPlayerOnline$1(t2.$index(0, player));
           }
         } else if (t1.$eq(cmd, "send-simulation")) {
           if (J.$eq$(J.$index$asx(payload, "alias"), this.rtSessionAlias))
@@ -11780,16 +11821,31 @@
                 t1 = t1[y];
                 if (x >>> 0 !== x || x >= t1.length)
                   return H.ioore(t1, x);
-                if (t1[x] === C.SpotState_1)
+                if (t1[x] === C.SpotState_1) {
                   this._setSpotState$3(x, y, C.SpotState_2);
+                  this._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-hit", "pos", P.LinkedHashMap__makeLiteral(["x", x, "y", y]), "player", playerId]));
+                }
               } else {
                 t1 = this.grids;
                 if (t1.$index(0, playerId) != null) {
                   t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(t1.$index(0, playerId)), y))._list;
                   if (x >>> 0 !== x || x >= t1.length)
                     return H.ioore(t1, x);
-                  J.set$className$x(t1[x], "hit");
+                  J.set$className$x(t1[x], "miss");
                 }
+              }
+            } else if (J.$eq$(t1.$index(data, "type"), "shot-hit")) {
+              playerId = t1.$index(data, "player");
+              pos = t1.$index(data, "pos");
+              t1 = J.getInterceptor$asx(pos);
+              x = t1.$index(pos, "x");
+              y = t1.$index(pos, "y");
+              t1 = this.grids;
+              if (t1.$index(0, playerId) != null) {
+                t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(t1.$index(0, playerId)), y))._list;
+                if (x >>> 0 !== x || x >= t1.length)
+                  return H.ioore(t1, x);
+                J.set$className$x(t1[x], "hit");
               }
             }
           }
