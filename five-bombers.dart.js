@@ -1376,13 +1376,13 @@
       return new H._Deserializer(true, []).deserialize$1(new H._Serializer(false, P._LinkedIdentityHashMap__LinkedIdentityHashMap$es6(null, P.$int)).serialize$1(message));
     },
     startRootIsolate_closure: {
-      "^": "Closure:1;__isolate_helper$_box_0,_captured_entry_1",
+      "^": "Closure:0;__isolate_helper$_box_0,_captured_entry_1",
       call$0: function() {
         this._captured_entry_1.call$1(this.__isolate_helper$_box_0._captured_args_0);
       }
     },
     startRootIsolate_closure0: {
-      "^": "Closure:1;__isolate_helper$_box_0,_captured_entry_2",
+      "^": "Closure:0;__isolate_helper$_box_0,_captured_entry_2",
       call$0: function() {
         this._captured_entry_2.call$2(this.__isolate_helper$_box_0._captured_args_0, null);
       }
@@ -1727,7 +1727,7 @@
       "^": "Object;"
     },
     IsolateNatives__processWorkerMessage_closure: {
-      "^": "Closure:1;_captured_entryPoint_0,_captured_args_1,_captured_message_2,_captured_isSpawnUri_3,_captured_startPaused_4,_captured_replyTo_5",
+      "^": "Closure:0;_captured_entryPoint_0,_captured_args_1,_captured_message_2,_captured_isSpawnUri_3,_captured_startPaused_4,_captured_replyTo_5",
       call$0: function() {
         H.IsolateNatives__startIsolate(this._captured_entryPoint_0, this._captured_args_1, this._captured_message_2, this._captured_isSpawnUri_3, this._captured_startPaused_4, this._captured_replyTo_5);
       }
@@ -1789,7 +1789,7 @@
       }
     },
     _NativeJsSendPort_send_closure: {
-      "^": "Closure:1;__isolate_helper$_captured_this_0,_captured_msg_1",
+      "^": "Closure:0;__isolate_helper$_captured_this_0,_captured_msg_1",
       call$0: function() {
         var t1 = this.__isolate_helper$_captured_this_0._receivePort;
         if (!t1.get$_isClosed())
@@ -1844,6 +1844,29 @@
     },
     TimerImpl: {
       "^": "Object;_once,_inEventLoop,_handle",
+      cancel$0: function() {
+        if (self.setTimeout != null) {
+          if (this._inEventLoop)
+            throw H.wrapException(new P.UnsupportedError("Timer in event loop cannot be canceled."));
+          var t1 = this._handle;
+          if (t1 == null)
+            return;
+          --init.globalState.topEventLoop._activeJsAsyncCount;
+          if (this._once)
+            self.clearTimeout(t1);
+          else
+            self.clearInterval(t1);
+          this._handle = null;
+        } else
+          throw H.wrapException(new P.UnsupportedError("Canceling a timer."));
+      },
+      TimerImpl$periodic$2: function(milliseconds, callback) {
+        if (self.setTimeout != null) {
+          ++init.globalState.topEventLoop._activeJsAsyncCount;
+          this._handle = self.setInterval(H.convertDartClosureToJS(new H.TimerImpl$periodic_closure(this, callback), 0), milliseconds);
+        } else
+          throw H.wrapException(new P.UnsupportedError("Periodic timer."));
+      },
       TimerImpl$2: function(milliseconds, callback) {
         var t1, t2;
         if (milliseconds === 0)
@@ -1866,6 +1889,10 @@
           var t1 = new H.TimerImpl(true, false, null);
           t1.TimerImpl$2(milliseconds, callback);
           return t1;
+        }, TimerImpl$periodic: function(milliseconds, callback) {
+          var t1 = new H.TimerImpl(false, false, null);
+          t1.TimerImpl$periodic$2(milliseconds, callback);
+          return t1;
         }}
     },
     TimerImpl_internalCallback: {
@@ -1881,6 +1908,12 @@
         this._captured_this_2._handle = null;
         --init.globalState.topEventLoop._activeJsAsyncCount;
         this._captured_callback_3.call$0();
+      }, null, null, 0, 0, null, "call"]
+    },
+    TimerImpl$periodic_closure: {
+      "^": "Closure:0;__isolate_helper$_captured_this_0,__isolate_helper$_captured_callback_1",
+      call$0: [function() {
+        this.__isolate_helper$_captured_callback_1.call$1(this.__isolate_helper$_captured_this_0);
       }, null, null, 0, 0, null, "call"]
     },
     CapabilityImpl: {
@@ -1961,7 +1994,7 @@
         if (!(x instanceof P.Object))
           this.unsupported$1(x);
         return ["dart", init.classIdExtractor(x), this.serializeArrayInPlace$1(init.classFieldsExtractor(x))];
-      }, "call$1", "get$serialize", 2, 0, 0, 8],
+      }, "call$1", "get$serialize", 2, 0, 1, 8],
       unsupported$2: function(x, message) {
         throw H.wrapException(new P.UnsupportedError(H.S(message == null ? "Can't transmit:" : message) + " " + H.S(x)));
       },
@@ -2118,7 +2151,7 @@
           default:
             throw H.wrapException("couldn't deserialize: " + H.S(x));
         }
-      }, "call$1", "get$deserialize", 2, 0, 0, 8],
+      }, "call$1", "get$deserialize", 2, 0, 1, 8],
       deserializeArrayInPlace$1: function(x) {
         var t1, i, t2;
         t1 = J.getInterceptor$asx(x);
@@ -3313,6 +3346,32 @@
         return J.get$length$asx(this.__js_helper$_map._keys);
       }
     },
+    GeneralConstantMap: {
+      "^": "ConstantMap;_jsData",
+      _getMap$0: function() {
+        var backingMap = this.$map;
+        if (backingMap == null) {
+          backingMap = new H.JsLinkedHashMap(0, null, null, null, null, null, 0);
+          backingMap.$builtinTypeInfo = this.$builtinTypeInfo;
+          H.fillLiteralMap(this._jsData, backingMap);
+          this.$map = backingMap;
+        }
+        return backingMap;
+      },
+      $index: function(_, key) {
+        return this._getMap$0().$index(0, key);
+      },
+      forEach$1: function(_, f) {
+        this._getMap$0().forEach$1(0, f);
+      },
+      get$keys: function() {
+        return this._getMap$0().get$keys();
+      },
+      get$length: function(_) {
+        var t1 = this._getMap$0();
+        return t1.get$length(t1);
+      }
+    },
     JSInvocationMirror: {
       "^": "Object;_memberName,_internalName,_kind,_arguments,_namedArgumentNames,_namedIndices",
       get$memberName: function() {
@@ -3483,7 +3542,7 @@
       }
     },
     unwrapException_saveStackTrace: {
-      "^": "Closure:0;_captured_ex_0",
+      "^": "Closure:1;_captured_ex_0",
       call$1: function(error) {
         if (!!J.getInterceptor(error).$isError)
           if (error.$thrownJsError == null)
@@ -3506,31 +3565,31 @@
       }
     },
     invokeClosure_closure: {
-      "^": "Closure:1;_captured_closure_0",
+      "^": "Closure:0;_captured_closure_0",
       call$0: function() {
         return this._captured_closure_0.call$0();
       }
     },
     invokeClosure_closure0: {
-      "^": "Closure:1;_captured_closure_1,_captured_arg1_2",
+      "^": "Closure:0;_captured_closure_1,_captured_arg1_2",
       call$0: function() {
         return this._captured_closure_1.call$1(this._captured_arg1_2);
       }
     },
     invokeClosure_closure1: {
-      "^": "Closure:1;_captured_closure_3,_captured_arg1_4,_captured_arg2_5",
+      "^": "Closure:0;_captured_closure_3,_captured_arg1_4,_captured_arg2_5",
       call$0: function() {
         return this._captured_closure_3.call$2(this._captured_arg1_4, this._captured_arg2_5);
       }
     },
     invokeClosure_closure2: {
-      "^": "Closure:1;_captured_closure_6,_captured_arg1_7,_captured_arg2_8,_captured_arg3_9",
+      "^": "Closure:0;_captured_closure_6,_captured_arg1_7,_captured_arg2_8,_captured_arg3_9",
       call$0: function() {
         return this._captured_closure_6.call$3(this._captured_arg1_7, this._captured_arg2_8, this._captured_arg3_9);
       }
     },
     invokeClosure_closure3: {
-      "^": "Closure:1;_captured_closure_10,_captured_arg1_11,_captured_arg2_12,_captured_arg3_13,_captured_arg4_14",
+      "^": "Closure:0;_captured_closure_10,_captured_arg1_11,_captured_arg2_12,_captured_arg3_13,_captured_arg4_14",
       call$0: function() {
         return this._captured_closure_10.call$4(this._captured_arg1_11, this._captured_arg2_12, this._captured_arg3_13, this._captured_arg4_14);
       }
@@ -3942,7 +4001,7 @@
       $isMap: 1
     },
     JsLinkedHashMap_values_closure: {
-      "^": "Closure:0;__js_helper$_captured_this_0",
+      "^": "Closure:1;__js_helper$_captured_this_0",
       call$1: [function(each) {
         return this.__js_helper$_captured_this_0.$index(0, each);
       }, null, null, 2, 0, null, 20, "call"]
@@ -4002,7 +4061,7 @@
       }
     },
     initHooks_closure: {
-      "^": "Closure:0;_captured_getTag_0",
+      "^": "Closure:1;_captured_getTag_0",
       call$1: function(o) {
         return this._captured_getTag_0(o);
       }
@@ -4598,9 +4657,21 @@
       }
       return P.Timer__createTimer(duration, t1.bindCallback$2$runGuarded(callback, true));
     },
+    Timer_Timer$periodic: function(duration, callback) {
+      var t1 = $.Zone__current;
+      if (t1 === C.C__RootZone) {
+        t1.toString;
+        return P.Timer__createPeriodicTimer(duration, callback);
+      }
+      return P.Timer__createPeriodicTimer(duration, t1.bindUnaryCallback$2$runGuarded(callback, true));
+    },
     Timer__createTimer: function(duration, callback) {
       var milliseconds = C.JSInt_methods._tdivFast$1(duration._duration, 1000);
       return H.TimerImpl$(milliseconds < 0 ? 0 : milliseconds, callback);
+    },
+    Timer__createPeriodicTimer: function(duration, callback) {
+      var milliseconds = C.JSInt_methods._tdivFast$1(duration._duration, 1000);
+      return H.TimerImpl$periodic(milliseconds < 0 ? 0 : milliseconds, callback);
     },
     _rootHandleUncaughtError: function($self, $parent, zone, error, stackTrace) {
       var t1, entry, t2;
@@ -4680,7 +4751,7 @@
       P._scheduleAsyncCallback(new P._AsyncCallbackEntry(f, zone, null));
     },
     _AsyncRun__initializeScheduleImmediate_internalCallback: {
-      "^": "Closure:0;_async$_box_0",
+      "^": "Closure:1;_async$_box_0",
       call$1: [function(_) {
         var t1, f;
         --init.globalState.topEventLoop._activeJsAsyncCount;
@@ -4702,14 +4773,14 @@
       }
     },
     _AsyncRun__scheduleImmediateJsOverride_internalCallback: {
-      "^": "Closure:1;_async$_captured_callback_0",
+      "^": "Closure:0;_async$_captured_callback_0",
       call$0: [function() {
         --init.globalState.topEventLoop._activeJsAsyncCount;
         this._async$_captured_callback_0.call$0();
       }, null, null, 0, 0, null, "call"]
     },
     _AsyncRun__scheduleImmediateWithSetImmediate_internalCallback: {
-      "^": "Closure:1;_async$_captured_callback_0",
+      "^": "Closure:0;_async$_captured_callback_0",
       call$0: [function() {
         --init.globalState.topEventLoop._activeJsAsyncCount;
         this._async$_captured_callback_0.call$0();
@@ -5029,13 +5100,13 @@
         }}
     },
     _Future__addListener_closure: {
-      "^": "Closure:1;_async$_captured_this_0,_captured_listener_1",
+      "^": "Closure:0;_async$_captured_this_0,_captured_listener_1",
       call$0: function() {
         P._Future__propagateToListeners(this._async$_captured_this_0, this._captured_listener_1);
       }
     },
     _Future__chainForeignFuture_closure: {
-      "^": "Closure:0;_captured_target_0",
+      "^": "Closure:1;_captured_target_0",
       call$1: [function(value) {
         this._captured_target_0._completeWithValue$1(value);
       }, null, null, 2, 0, null, 3, "call"]
@@ -5049,25 +5120,25 @@
       }, "call$1", null, null, null, 2, 2, null, 4, 1, 2, "call"]
     },
     _Future__chainForeignFuture_closure1: {
-      "^": "Closure:1;_captured_target_2,_captured_e_3,_captured_s_4",
+      "^": "Closure:0;_captured_target_2,_captured_e_3,_captured_s_4",
       call$0: [function() {
         this._captured_target_2._completeError$2(this._captured_e_3, this._captured_s_4);
       }, null, null, 0, 0, null, "call"]
     },
     _Future__asyncComplete_closure: {
-      "^": "Closure:1;_async$_captured_this_0,_captured_coreFuture_1",
+      "^": "Closure:0;_async$_captured_this_0,_captured_coreFuture_1",
       call$0: function() {
         P._Future__chainCoreFuture(this._captured_coreFuture_1, this._async$_captured_this_0);
       }
     },
     _Future__asyncComplete_closure0: {
-      "^": "Closure:1;_async$_captured_this_2,_captured_value_3",
+      "^": "Closure:0;_async$_captured_this_2,_captured_value_3",
       call$0: function() {
         this._async$_captured_this_2._completeWithValue$1(this._captured_value_3);
       }
     },
     _Future__asyncCompleteError_closure: {
-      "^": "Closure:1;_async$_captured_this_0,_captured_error_1,_captured_stackTrace_2",
+      "^": "Closure:0;_async$_captured_this_0,_captured_error_1,_captured_stackTrace_2",
       call$0: function() {
         this._async$_captured_this_0._completeError$2(this._captured_error_1, this._captured_stackTrace_2);
       }
@@ -5182,7 +5253,7 @@
       }
     },
     _Future__propagateToListeners_handleWhenCompleteCallback_closure: {
-      "^": "Closure:0;_box_2,_captured_result_11",
+      "^": "Closure:1;_box_2,_captured_result_11",
       call$1: [function(ignored) {
         P._Future__propagateToListeners(this._box_2._captured_source_4, new P._FutureListener(null, this._captured_result_11, 0, null, null));
       }, null, null, 2, 0, null, 21, "call"]
@@ -5274,42 +5345,42 @@
       }
     },
     Stream_forEach__closure: {
-      "^": "Closure:1;_captured_action_4,_captured_element_5",
+      "^": "Closure:0;_captured_action_4,_captured_element_5",
       call$0: function() {
         return this._captured_action_4.call$1(this._captured_element_5);
       }
     },
     Stream_forEach__closure0: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(_) {
       }
     },
     Stream_forEach_closure0: {
-      "^": "Closure:1;_captured_future_6",
+      "^": "Closure:0;_captured_future_6",
       call$0: [function() {
         this._captured_future_6._complete$1(null);
       }, null, null, 0, 0, null, "call"]
     },
     Stream_length_closure: {
-      "^": "Closure:0;_async$_box_0",
+      "^": "Closure:1;_async$_box_0",
       call$1: [function(_) {
         ++this._async$_box_0._captured_count_0;
       }, null, null, 2, 0, null, 5, "call"]
     },
     Stream_length_closure0: {
-      "^": "Closure:1;_async$_box_0,_captured_future_1",
+      "^": "Closure:0;_async$_box_0,_captured_future_1",
       call$0: [function() {
         this._captured_future_1._complete$1(this._async$_box_0._captured_count_0);
       }, null, null, 0, 0, null, "call"]
     },
     Stream_isEmpty_closure: {
-      "^": "Closure:0;_async$_box_0,_captured_future_1",
+      "^": "Closure:1;_async$_box_0,_captured_future_1",
       call$1: [function(_) {
         P._cancelAndValue(this._async$_box_0._captured_subscription_0, this._captured_future_1, false);
       }, null, null, 2, 0, null, 5, "call"]
     },
     Stream_isEmpty_closure0: {
-      "^": "Closure:1;_captured_future_2",
+      "^": "Closure:0;_captured_future_2",
       call$0: [function() {
         this._captured_future_2._complete$1(true);
       }, null, null, 0, 0, null, "call"]
@@ -5326,7 +5397,7 @@
       }
     },
     Stream_toList_closure0: {
-      "^": "Closure:1;_captured_result_2,_captured_future_3",
+      "^": "Closure:0;_captured_result_2,_captured_future_3",
       call$0: [function() {
         this._captured_future_3._complete$1(this._captured_result_2);
       }, null, null, 0, 0, null, "call"]
@@ -5343,7 +5414,7 @@
       }
     },
     Stream_first_closure0: {
-      "^": "Closure:1;_captured_future_3",
+      "^": "Closure:0;_captured_future_3",
       call$0: [function() {
         var e, s, t1, exception;
         try {
@@ -5371,7 +5442,7 @@
       }
     },
     Stream_last_closure0: {
-      "^": "Closure:1;_async$_box_0,_captured_future_2",
+      "^": "Closure:0;_async$_box_0,_captured_future_2",
       call$0: [function() {
         var e, s, t1, exception;
         t1 = this._async$_box_0;
@@ -5501,7 +5572,7 @@
       }
     },
     _StreamController__subscribe_closure: {
-      "^": "Closure:1;_async$_captured_this_0",
+      "^": "Closure:0;_async$_captured_this_0",
       call$0: function() {
         P._runGuarded(this._async$_captured_this_0.onListen);
       }
@@ -5881,7 +5952,7 @@
       }
     },
     _PendingEvents_schedule_closure: {
-      "^": "Closure:1;_async$_captured_this_0,_captured_dispatch_1",
+      "^": "Closure:0;_async$_captured_this_0,_captured_dispatch_1",
       call$0: [function() {
         var t1, oldState;
         t1 = this._async$_captured_this_0;
@@ -5918,7 +5989,7 @@
       }
     },
     _cancelAndError_closure: {
-      "^": "Closure:1;_captured_future_0,_captured_error_1,_captured_stackTrace_2",
+      "^": "Closure:0;_captured_future_0,_captured_error_1,_captured_stackTrace_2",
       call$0: [function() {
         return this._captured_future_0._completeError$2(this._captured_error_1, this._captured_stackTrace_2);
       }, null, null, 0, 0, null, "call"]
@@ -5930,7 +6001,7 @@
       }
     },
     _cancelAndValue_closure: {
-      "^": "Closure:1;_captured_future_0,_captured_value_1",
+      "^": "Closure:0;_captured_future_0,_captured_value_1",
       call$0: [function() {
         return this._captured_future_0._complete$1(this._captured_value_1);
       }, null, null, 0, 0, null, "call"]
@@ -6033,6 +6104,9 @@
         return this._transform.call$1(arg0);
       }
     },
+    Timer: {
+      "^": "Object;"
+    },
     AsyncError: {
       "^": "Object;error>,stackTrace<",
       toString$0: function(_) {
@@ -6044,7 +6118,7 @@
       "^": "Object;"
     },
     _rootHandleUncaughtError_closure: {
-      "^": "Closure:1;_async$_box_0,_captured_stackTrace_1",
+      "^": "Closure:0;_async$_box_0,_captured_stackTrace_1",
       call$0: function() {
         var t1, t2, error;
         t1 = this._async$_box_0;
@@ -6143,19 +6217,19 @@
       }
     },
     _RootZone_bindCallback_closure: {
-      "^": "Closure:1;_async$_captured_this_0,_captured_f_1",
+      "^": "Closure:0;_async$_captured_this_0,_captured_f_1",
       call$0: function() {
         return this._async$_captured_this_0.runGuarded$1(this._captured_f_1);
       }
     },
     _RootZone_bindCallback_closure0: {
-      "^": "Closure:1;_async$_captured_this_2,_captured_f_3",
+      "^": "Closure:0;_async$_captured_this_2,_captured_f_3",
       call$0: function() {
         return this._async$_captured_this_2.run$1(this._captured_f_3);
       }
     },
     _RootZone_bindUnaryCallback_closure: {
-      "^": "Closure:0;_async$_captured_this_0,_captured_f_1",
+      "^": "Closure:1;_async$_captured_this_0,_captured_f_1",
       call$1: [function(arg) {
         return this._async$_captured_this_0.runUnaryGuarded$2(this._captured_f_1, arg);
       }, null, null, 2, 0, null, 23, "call"]
@@ -9570,7 +9644,7 @@
       }
     },
     Uri_parseIPv4Address_closure: {
-      "^": "Closure:0;_captured_error_0",
+      "^": "Closure:1;_captured_error_0",
       call$1: [function(byteString) {
         var $byte, t1;
         $byte = H.Primitives_parseInt(byteString, null, null);
@@ -10294,7 +10368,7 @@
       }
     },
     _BeforeUnloadEventStreamProvider_forTarget_closure: {
-      "^": "Closure:0;_captured_controller_0",
+      "^": "Closure:1;_captured_controller_0",
       call$1: [function($event) {
         var wrapped, t1;
         wrapped = new W._BeforeUnloadEvent(null, $event, null);
@@ -10930,7 +11004,7 @@
       if (!!t1.$isFunction)
         return P._getJsProxy(o, "$dart_jsFunction", new P._convertToJS_closure());
       return P._getJsProxy(o, "_$dart_jsObject", new P._convertToJS_closure0($.$get$_dartProxyCtor()));
-    }, "call$1", "js___convertToJS$closure", 2, 0, 0, 6],
+    }, "call$1", "js___convertToJS$closure", 2, 0, 1, 6],
     _getJsProxy: function(o, propertyName, createProxy) {
       var jsProxy = P._getOwnProperty(o, propertyName);
       if (jsProxy == null) {
@@ -11023,7 +11097,7 @@
         }}
     },
     JsObject__convertDataTree__convert: {
-      "^": "Closure:0;_captured__convertedObjects_0",
+      "^": "Closure:1;_captured__convertedObjects_0",
       call$1: [function(o) {
         var t1, t2, convertedMap, key, convertedList;
         t1 = this._captured__convertedObjects_0;
@@ -11098,7 +11172,7 @@
       $asIterable: null
     },
     _convertToJS_closure: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(o) {
         var jsFunction = function(_call, f, captureThis) {
           return function() {
@@ -11110,25 +11184,25 @@
       }
     },
     _convertToJS_closure0: {
-      "^": "Closure:0;_captured_ctor_0",
+      "^": "Closure:1;_captured_ctor_0",
       call$1: function(o) {
         return new this._captured_ctor_0(o);
       }
     },
     _wrapToDart_closure: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(o) {
         return new P.JsFunction(o);
       }
     },
     _wrapToDart_closure0: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(o) {
         return H.setRuntimeTypeInfo(new P.JsArray(o), [null]);
       }
     },
     _wrapToDart_closure1: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(o) {
         return new P.JsObject(o);
       }
@@ -11429,6 +11503,7 @@
       J.$indexSet$ax(t1, "randomMatch", new Q.main_closure0(game));
       J.$indexSet$ax(t1, "listMatches", new Q.main_closure1(game));
       J.$indexSet$ax(t1, "externalAuth", new Q.main_closure2(game));
+      J.$indexSet$ax(t1, "onReady", new Q.main_closure3(game));
     }, "call$0", "five2dbombers__main$closure", 0, 0, 2],
     main_closure: {
       "^": "Closure:24;_captured_game_0",
@@ -11438,29 +11513,29 @@
       }, null, null, 2, 0, null, 0, "call"]
     },
     main_closure0: {
-      "^": "Closure:1;_captured_game_1",
+      "^": "Closure:0;_captured_game_1",
       call$0: [function() {
         this._captured_game_1.findMatch$1(new Q.main__closure0());
       }, null, null, 0, 0, null, "call"]
     },
     main__closure0: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(JsObject) {
       }
     },
     main_closure1: {
-      "^": "Closure:1;_captured_game_2",
+      "^": "Closure:0;_captured_game_2",
       call$0: [function() {
         this._captured_game_2.listMatches$1(new Q.main__closure());
       }, null, null, 0, 0, null, "call"]
     },
     main__closure: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(JsObject) {
       }
     },
     main_closure2: {
-      "^": "Closure:0;_captured_game_3",
+      "^": "Closure:1;_captured_game_3",
       call$1: [function(auth) {
         var t1, t2;
         t1 = this._captured_game_3;
@@ -11472,14 +11547,60 @@
       }, null, null, 2, 0, null, 30, "call"]
     },
     main__closure1: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(JsObject) {
       }
+    },
+    main_closure3: {
+      "^": "Closure:0;_captured_game_4",
+      call$0: [function() {
+        var t1, t2;
+        t1 = this._captured_game_4;
+        t2 = document.querySelector("#action").style;
+        t2.display = "none";
+        t1._setState$1(C.State_1);
+        t1._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "ready"]));
+      }, null, null, 0, 0, null, "call"]
     }
   }, 1], ["game", "Game.dart",, Q, {
     "^": "",
+    State: {
+      "^": "Object;index",
+      toString$0: function(_) {
+        return C.Map_yT1Od.$index(0, this.index);
+      }
+    },
     Game: {
-      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,isAuthenticated",
+      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,state,timerSeconds,isAuthenticated",
+      _startTimer$1: function(seconds) {
+        this.timerSeconds = seconds;
+        document.querySelector("#timer").textContent = H.S(this.timerSeconds);
+        P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 1), new Q.Game__startTimer_closure(this));
+      },
+      _setState$1: function(state) {
+        var instr;
+        this.state = state;
+        switch (state) {
+          case C.State_0:
+            instr = "Set up";
+            break;
+          case C.State_1:
+            instr = "Wait";
+            break;
+          case C.State_2:
+            instr = "Wait";
+            break;
+          case C.State_3:
+            instr = "FIRE";
+            break;
+          case C.State_4:
+            instr = "Done";
+            break;
+          default:
+            instr = null;
+        }
+        document.querySelector("#instructions").textContent = instr;
+      },
       _renderGrid$4: function(holder, username, accountId, $self) {
         var $name, t1, grid, t2, y, row, t3, x, cell, t4, t5, t6, t7;
         $name = C.HtmlDocument_methods.createElement$1(document, "label");
@@ -11519,6 +11640,8 @@
         var t1, t2, playerHolder, currentPlayers, allPlayers, t3, playerId, t4, player, t5, opponentHolder, message;
         t1 = J.getInterceptor$asx(response);
         if (t1.$index(response, "hasError") !== true) {
+          this._setState$1(C.State_0);
+          this._startTimer$1(20);
           t2 = document.querySelector("#controls").style;
           t2.display = "inherit";
           this.match = C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [t1.$index(response, "data")]));
@@ -11569,6 +11692,10 @@
           t1._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.rtCluster]), new Q.Game_findMatch_closure0(this, callback));
         } else
           this.hydraLogin$2(P.LinkedHashMap__makeLiteral(["anonymous", true]), new Q.Game_findMatch_closure1(this, callback));
+      },
+      _sendAllGameMessage$1: function(payload) {
+        var message = P.LinkedHashMap__makeLiteral(["cmd", "send-all", "payload", P.LinkedHashMap__makeLiteral(["alias", this.rtSessionAlias, "reliable", true, "type", "string", "payload", C.JsonCodec_null_null.encode$1(payload)])]);
+        this.hydraClient.wsSend$1(message);
       },
       _onRtMessage$2: [function(cmd, payload) {
         var t1, t2, player, t3, opponentHolder, data, playerId, pos, x, y;
@@ -11661,7 +11788,7 @@
           this.hydraLogin$2(authToken, new Q.Game_closure());
       },
       static: {Game$: function(client) {
-          var t1 = new Q.Game(null, null, null, null, null, H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]), false);
+          var t1 = new Q.Game(null, null, null, null, null, H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]), C.State_0, null, false);
           t1.Game$1(client);
           return t1;
         }}
@@ -11673,13 +11800,27 @@
           P.print("Invalid saved token, will have to create new account");
       }
     },
-    Game__renderGrid_closure: {
-      "^": "Closure:0;_game$_captured_this_0,_captured_accountId_1,_captured_y_2,_captured_x_3",
-      call$1: [function(e) {
-        var t1, message;
+    Game__startTimer_closure: {
+      "^": "Closure:26;_game$_captured_this_0",
+      call$1: function(timer) {
+        var t1, t2;
         t1 = this._game$_captured_this_0;
-        message = P.LinkedHashMap__makeLiteral(["cmd", "send-all", "payload", P.LinkedHashMap__makeLiteral(["alias", t1.rtSessionAlias, "reliable", true, "type", "string", "payload", C.JsonCodec_null_null.encode$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_3, "y", this._captured_y_2]), "player", this._captured_accountId_1]))])]);
-        t1.hydraClient.wsSend$1(message);
+        t2 = t1.timerSeconds;
+        if (typeof t2 !== "number")
+          return t2.$sub();
+        t1.timerSeconds = t2 - 1;
+        document.querySelector("#timer").textContent = H.S(t1.timerSeconds);
+        t1 = t1.timerSeconds;
+        if (typeof t1 !== "number")
+          return t1.$le();
+        if (t1 <= 0)
+          timer.cancel$0();
+      }
+    },
+    Game__renderGrid_closure: {
+      "^": "Closure:1;_game$_captured_this_0,_captured_accountId_1,_captured_y_2,_captured_x_3",
+      call$1: [function(e) {
+        this._game$_captured_this_0._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_3, "y", this._captured_y_2]), "player", this._captured_accountId_1]));
       }, null, null, 2, 0, null, 0, "call"]
     },
     Game_findMatch_closure: {
@@ -11743,7 +11884,7 @@
       }
     },
     Game__listMatches__closure: {
-      "^": "Closure:0;_game$_captured_this_2,_captured_existingMatch_3",
+      "^": "Closure:1;_game$_captured_this_2,_captured_existingMatch_3",
       call$1: [function(e) {
         var t1 = this._game$_captured_this_2;
         t1.hydraClient._request$4("matches/matchmaking/5-way/join/" + H.S(J.$index$asx(this._captured_existingMatch_3, "id")), "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.hydraClient.rtCluster]), new Q.Game__listMatches___closure(t1));
@@ -11900,13 +12041,13 @@
       }
     },
     convertNativePromiseToDartFuture_closure: {
-      "^": "Closure:0;_captured_completer_0",
+      "^": "Closure:1;_captured_completer_0",
       call$1: [function(result) {
         return this._captured_completer_0.complete$1(0, result);
       }, null, null, 2, 0, null, 11, "call"]
     },
     convertNativePromiseToDartFuture_closure0: {
-      "^": "Closure:0;_captured_completer_1",
+      "^": "Closure:1;_captured_completer_1",
       call$1: [function(result) {
         return this._captured_completer_1.completeError$1(result);
       }, null, null, 2, 0, null, 11, "call"]
@@ -11984,7 +12125,7 @@
       }
     },
     CssClassSetImpl_add_closure: {
-      "^": "Closure:0;_captured_value_0",
+      "^": "Closure:1;_captured_value_0",
       call$1: function(s) {
         return s.add$1(0, this._captured_value_0);
       }
@@ -12043,13 +12184,13 @@
       }
     },
     FilteredElementList__iterable_closure: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(n) {
         return !!J.getInterceptor(n).$isElement;
       }
     },
     FilteredElementList_removeRange_closure: {
-      "^": "Closure:0;",
+      "^": "Closure:1;",
       call$1: function(el) {
         return J.remove$0$ax(el);
       }
@@ -12135,7 +12276,7 @@
       }
     },
     Hydra__getJSCallback_closure: {
-      "^": "Closure:26;_captured_callback_0",
+      "^": "Closure:27;_captured_callback_0",
       call$2: [function(client, response) {
         this._captured_callback_0.call$1(response);
       }, null, null, 4, 0, null, 31, 32, "call"]
@@ -12150,13 +12291,13 @@
       }
     },
     Hydra__realtimeConnect_scheduleReconnect_closure: {
-      "^": "Closure:1;_captured_this_4,_captured_wsAddress_5,_captured_accountId_6",
+      "^": "Closure:0;_captured_this_4,_captured_wsAddress_5,_captured_accountId_6",
       call$0: function() {
         return this._captured_this_4._realtimeConnect$2(this._captured_wsAddress_5, this._captured_accountId_6);
       }
     },
     Hydra__realtimeConnect_closure: {
-      "^": "Closure:0;_captured_this_7,_captured_accountId_8",
+      "^": "Closure:1;_captured_this_7,_captured_accountId_8",
       call$1: [function(e) {
         var t1;
         P.print("Realtime: Connected");
@@ -12165,21 +12306,21 @@
       }, null, null, 2, 0, null, 0, "call"]
     },
     Hydra__realtimeConnect_closure0: {
-      "^": "Closure:0;_captured_scheduleReconnect_9",
+      "^": "Closure:1;_captured_scheduleReconnect_9",
       call$1: [function(e) {
         P.print("Realtime: Websocket closed, retrying in 1 second");
         this._captured_scheduleReconnect_9.call$0();
       }, null, null, 2, 0, null, 0, "call"]
     },
     Hydra__realtimeConnect_closure1: {
-      "^": "Closure:0;_captured_scheduleReconnect_10",
+      "^": "Closure:1;_captured_scheduleReconnect_10",
       call$1: [function(e) {
         P.print("Realtime: Error connecting to ws");
         this._captured_scheduleReconnect_10.call$0();
       }, null, null, 2, 0, null, 0, "call"]
     },
     Hydra__realtimeConnect_closure2: {
-      "^": "Closure:27;_captured_this_11",
+      "^": "Closure:28;_captured_this_11",
       call$1: [function(e) {
         var message, t1, cmd, t2;
         message = C.JsonCodec_null_null.decode$1(J.get$data$x(e));
@@ -12200,7 +12341,7 @@
       }, null, null, 2, 0, null, 0, "call"]
     },
     Hydra__wsPing_closure: {
-      "^": "Closure:1;_captured_this_0",
+      "^": "Closure:0;_captured_this_0",
       call$0: function() {
         return this._captured_this_0._wsPing$0();
       }
@@ -12649,6 +12790,12 @@
   C.List_qg4 = Isolate.makeConstantList([0, 0, 65490, 12287, 65535, 34815, 65534, 18431]);
   C.List_empty0 = H.setRuntimeTypeInfo(Isolate.makeConstantList([]), [P.Symbol]);
   C.Map_empty = H.setRuntimeTypeInfo(new H.ConstantStringMap(0, {}, C.List_empty0), [P.Symbol, null]);
+  C.Map_yT1Od = new H.GeneralConstantMap([0, "State.Setup", 1, "State.Ready", 2, "State.Waiting", 3, "State.Turn", 4, "State.Finished"]);
+  C.State_0 = new Q.State(0);
+  C.State_1 = new Q.State(1);
+  C.State_2 = new Q.State(2);
+  C.State_3 = new Q.State(3);
+  C.State_4 = new Q.State(4);
   C.Symbol_call = new H.Symbol0("call");
   C.Utf8Codec_false = new P.Utf8Codec(false);
   C._BeforeUnloadEventStreamProvider_beforeunload = new W._BeforeUnloadEventStreamProvider("beforeunload");
@@ -12766,7 +12913,7 @@
   Isolate = Isolate.$finishIsolateConstructor(Isolate);
   $ = new Isolate();
   init.metadata = ["e", "error", "stackTrace", "value", null, "_", "o", "object", "x", "data", "key", "result", "sender", "closure", "isolate", "numberOfArguments", "arg1", "arg2", "arg3", "arg4", "each", "ignored", "element", "arg", "byteString", "event", "callback", "captureThis", "self", "arguments", "auth", "client", "response"];
-  init.types = [{func: 1, args: [,]}, {func: 1}, {func: 1, v: true}, {func: 1, args: [P.JsObject]}, {func: 1, args: [,,]}, {func: 1, v: true, args: [{func: 1, v: true}]}, {func: 1, v: true, args: [,], opt: [P.StackTrace]}, {func: 1, args: [,], opt: [,]}, {func: 1, ret: P.String, args: [P.$int]}, {func: 1, ret: P.Object, args: [,]}, {func: 1, args: [P.String,,]}, {func: 1, args: [, P.String]}, {func: 1, args: [P.String]}, {func: 1, args: [{func: 1, v: true}]}, {func: 1, ret: P.bool}, {func: 1, args: [, P.StackTrace]}, {func: 1, v: true, args: [, P.StackTrace]}, {func: 1, ret: P.$int, args: [, P.$int]}, {func: 1, v: true, args: [P.$int, P.$int]}, {func: 1, args: [P.Symbol,,]}, {func: 1, ret: P.$int, args: [,,]}, {func: 1, v: true, args: [P.String]}, {func: 1, v: true, args: [P.String], opt: [,]}, {func: 1, ret: P.$int, args: [P.$int, P.$int]}, {func: 1, args: [W.BeforeUnloadEvent]}, {func: 1, v: true, args: [P.String, P.Map]}, {func: 1, args: [, P.JsObject]}, {func: 1, args: [W.MessageEvent]}];
+  init.types = [{func: 1}, {func: 1, args: [,]}, {func: 1, v: true}, {func: 1, args: [P.JsObject]}, {func: 1, args: [,,]}, {func: 1, v: true, args: [{func: 1, v: true}]}, {func: 1, v: true, args: [,], opt: [P.StackTrace]}, {func: 1, args: [,], opt: [,]}, {func: 1, ret: P.String, args: [P.$int]}, {func: 1, ret: P.Object, args: [,]}, {func: 1, args: [P.String,,]}, {func: 1, args: [, P.String]}, {func: 1, args: [P.String]}, {func: 1, args: [{func: 1, v: true}]}, {func: 1, ret: P.bool}, {func: 1, args: [, P.StackTrace]}, {func: 1, v: true, args: [, P.StackTrace]}, {func: 1, ret: P.$int, args: [, P.$int]}, {func: 1, v: true, args: [P.$int, P.$int]}, {func: 1, args: [P.Symbol,,]}, {func: 1, ret: P.$int, args: [,,]}, {func: 1, v: true, args: [P.String]}, {func: 1, v: true, args: [P.String], opt: [,]}, {func: 1, ret: P.$int, args: [P.$int, P.$int]}, {func: 1, args: [W.BeforeUnloadEvent]}, {func: 1, v: true, args: [P.String, P.Map]}, {func: 1, args: [P.Timer]}, {func: 1, args: [, P.JsObject]}, {func: 1, args: [W.MessageEvent]}];
   function convertToFastObject(properties) {
     function MyClass() {
     }

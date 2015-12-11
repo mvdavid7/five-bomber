@@ -28,6 +28,10 @@ h1 {
 
 #player .blank { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 
+#clock { font-size: 30px; }
+#clock .wrapper { height: 180px; }
+#clock label { height: 30%; display: block; }
+
 .playerspot label { white-space: nowrap; }
 
 .playergrid { border-spacing: 0px; margin: 0 auto; padding: 0; }
