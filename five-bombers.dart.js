@@ -3421,6 +3421,9 @@
         }
         return backingMap;
       },
+      containsKey$1: function(key) {
+        return this._getMap$0().containsKey$1(key);
+      },
       $index: function(_, key) {
         return this._getMap$0().$index(0, key);
       },
@@ -7305,6 +7308,9 @@
       },
       $indexSet: function(_, key, value) {
         J.$indexSet$ax(this._map, key, value);
+      },
+      containsKey$1: function(key) {
+        return this._map.containsKey$1(key);
       },
       forEach$1: function(_, action) {
         J.forEach$1$ax(this._map, action);
@@ -11868,12 +11874,15 @@
   }], ["", "five-bombers.dart",, Q, {
     "^": "",
     main: [function() {
-      var t1, t2, client, game;
+      var t1, t2, client, url, apiKey, game;
       t1 = $.$get$context();
       t2 = P.JsObject_JsObject(J.$index$asx(t1, "Client"), null);
-      client = new Q.Hydra(null, null, null, null, null);
+      client = new Q.Hydra(null, null, null, null, null, null);
       client._client = t2;
-      t2.callMethod$2("init", [J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_url"), J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_apikey")]);
+      url = P.Uri_base().get$queryParameters()._map.containsKey$1("hydra_url") === true ? J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_url") : "https://api.hydra.agoragames.com";
+      apiKey = P.Uri_base().get$queryParameters()._map.containsKey$1("hydra_apikey") === true ? J.$index$asx(P.Uri_base().get$queryParameters()._map, "hydra_apikey") : "4191b07670094fa588d70d801d2b7805";
+      client.apiKey = apiKey;
+      t2.callMethod$2("init", [url, apiKey]);
       game = Q.Game$(client);
       C._BeforeUnloadEventStreamProvider_beforeunload.forTarget$1(window).listen$1(new Q.main_closure(game));
       J.$indexSet$ax(t1, "randomMatch", new Q.main_closure0(game));
@@ -12379,12 +12388,13 @@
         this.hydraClient.startupWithOptions$3(auth, ["profile", "account", "configuration"], new Q.Game_hydraLogin_closure(this, callback));
       },
       getSavedAuthToken$0: function() {
-        var ca, i, c;
+        var cookieName, ca, i, c;
+        cookieName = "five-bombers-auth-token-" + H.S(this.hydraClient.apiKey) + "=";
         ca = document.cookie.split(";");
         for (i = 0; i < ca.length; ++i) {
           c = J.trim$0$s(ca[i]);
-          if (C.JSString_methods.indexOf$1(c, "five-bombers-auth-token=") === 0)
-            return C.JSString_methods.substring$1(c, 24);
+          if (C.JSString_methods.indexOf$1(c, cookieName) === 0)
+            return C.JSString_methods.substring$1(c, cookieName.length);
         }
         return;
       },
@@ -12565,7 +12575,7 @@
           t2.isAuthenticated = true;
           t3 = J.$index$asx(t2.hydraClient._client, "authToken");
           expires = P.DateTime$fromMillisecondsSinceEpoch(Date.now() + C.JSInt_methods._tdivFast$1(P.Duration$(60, 0, 0, 0, 0, 0)._duration, 1000), false);
-          document.cookie = C.JSString_methods.$add("five-bombers-auth-token=", t3) + "; path=/; expires=" + expires.toString$0(0);
+          document.cookie = C.JSString_methods.$add("five-bombers-auth-token-" + H.S(t2.hydraClient.apiKey) + "=", t3) + "; path=/; expires=" + expires.toString$0(0);
           t1 = t1.$index(response, "data");
           t3 = new G.FiveBomberPlayer(null, null, null);
           t4 = J.getInterceptor$asx(t1);
@@ -12861,7 +12871,7 @@
   }], ["hydra", "Hydra.dart",, Q, {
     "^": "",
     Hydra: {
-      "^": "Object;_client,ws,_realtimeConnectionId,onRtMessage,rtCluster",
+      "^": "Object;_client,ws,_realtimeConnectionId,onRtMessage,rtCluster,apiKey",
       $index: function(_, attr) {
         return J.$index$asx(this._client, attr);
       },
