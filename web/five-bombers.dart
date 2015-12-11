@@ -42,4 +42,8 @@ void main() {
 
     });
   };
+
+  context['onReady'] = () {
+    game.onReady();
+  };
 }

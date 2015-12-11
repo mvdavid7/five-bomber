@@ -2,12 +2,14 @@
 
 library game;
 
+import 'dart:async';
 import 'dart:html';
 import 'dart:js';
 import 'dart:convert';
 import 'Hydra.dart';
 import 'Player.dart';
 
+enum State { Setup, Ready, Waiting, Turn, Finished}
 
 class Game {
   Hydra hydraClient;
@@ -16,6 +18,8 @@ class Game {
   int rtSessionAlias;
   TableElement grid = null;
   Map<String, TableElement> grids = new Map();
+  State state = State.Setup;
+  int timerSeconds;
 
   Game(Hydra client) {
     this.hydraClient = client;
@@ -28,6 +32,60 @@ class Game {
         }
       });
     }
+  }
+
+  void _updateTimer() {
+    querySelector('#timer').text = '${this.timerSeconds}';
+  }
+
+  void _startTimer(int seconds) {
+    this.timerSeconds = seconds;
+    this._updateTimer();
+
+    new Timer.periodic(
+        new Duration(seconds: 1),
+        (Timer timer) {
+          this.timerSeconds--;
+          this._updateTimer();
+          if(this.timerSeconds <= 0)
+            timer.cancel();
+        });
+  }
+
+  void _setState(State state) {
+    String instr;
+    this.state = state;
+    switch(state) {
+      case State.Setup:
+        instr = 'Set up';
+        break;
+      case State.Ready:
+        instr = 'Wait';
+        break;
+      case State.Waiting:
+        instr = 'Wait';
+        break;
+      case State.Turn:
+        instr = 'FIRE';
+        break;
+      case State.Finished:
+        instr = 'Done';
+        break;
+    }
+    querySelector('#instructions').text = instr;
+  }
+
+  void onSetup() {
+    this._setState(State.Setup);
+    this._startTimer(20);
+  }
+
+  void onReady() {
+    querySelector('#action').style.display = 'none';
+    this._setState(State.Ready);
+    this._sendAllGameMessage({
+      'type': 'ready'
+    });
   }
 
   TableElement _renderGrid(Element holder, String username, String accountId, bool self) {
@@ -50,20 +108,11 @@ class Game {
         cell.className = 'empty' + (self ? ' opponent' : '');
         if(!self) {
           cell.onClick.listen((e) {
-            Map message = {
-              'cmd': 'send-all',
-              'payload': {
-                'alias': this.rtSessionAlias,
-                'reliable': true,
-                'type': 'string',
-                'payload': JSON.encode({
-                  'type': 'shot-fired',
-                  'pos': {'x': x, 'y': y},
-                  'player': accountId
-                })
-              }
-            };
-            hydraClient.wsSend(message);
+            this._sendAllGameMessage({
+              'type': 'shot-fired',
+              'pos': {'x': x, 'y': y},
+              'player': accountId
+            });
           });
         }
       }
@@ -74,6 +123,8 @@ class Game {
 
   void _onMatchJoin(JsObject response) {
     if (!response['hasError']) {
+      this.onSetup();
+
       querySelector('#controls').style.display = 'inherit';
       this.match = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
 
@@ -159,6 +210,19 @@ class Game {
   // Hydra functions
 
   bool isAuthenticated = false;
+
+  void _sendAllGameMessage(Map payload) {
+    Map message = {
+      'cmd': 'send-all',
+      'payload': {
+        'alias': this.rtSessionAlias,
+        'reliable': true,
+        'type': 'string',
+        'payload': JSON.encode(payload)
+      }
+    };
+    hydraClient.wsSend(message);
+  }
 
   void _onRtMessage(String cmd, Map payload) {
     print(payload);
