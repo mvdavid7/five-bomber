@@ -12024,9 +12024,8 @@
         if (t1.containsKey$1(playerId)) {
           opHolder = J.get$parent$x(t1.$index(0, playerId));
           t2 = J.getInterceptor$x(opHolder);
+          t2.set$className(opHolder, "playerspot open");
           J.clear$0$ax(t2.get$children(opHolder));
-          t2.get$classes(opHolder).remove$1(0, "taken");
-          t2.get$classes(opHolder).add$1(0, "open");
           t1.remove$1(0, playerId);
         }
         t1 = this.opponents;
@@ -12045,6 +12044,13 @@
           t2.$indexSet(0, playerId, new X.FiveBomberOpponent(C.OpponentState_0));
         t1.get$classes(opponentGrid).remove$1(0, "offline");
         t1.get$classes(opponentGrid).add$1(0, "online");
+      },
+      _markPlayerOffline$1: function(playerId) {
+        var t1 = this.grids;
+        if (t1.containsKey$1(playerId)) {
+          J.get$classes$x(t1.$index(0, playerId)).remove$1(0, "online");
+          J.get$classes$x(t1.$index(0, playerId)).add$1(0, "offline");
+        }
       },
       _removeFromTurnOrder$1: function(playerId) {
         var currentTurn = this._getCurrentTurn$0();
@@ -12126,6 +12132,11 @@
         else
           this._setOpponentState$2(turn, C.OpponentState_2);
       },
+      onWin$0: function() {
+        this._setState$1(C.State_4);
+        var body = P.LinkedHashMap__makeLiteral(["win", [J.$index$asx(this.player.account, "id")], "loss", this.opponents.get$keys()]);
+        this.hydraClient._request$4("matches/" + H.S(J.$index$asx(this.match, "id")) + "/complete", "PUT", body, new Q.Game_onWin_closure());
+      },
       _renderGrid$4: function(holder, username, accountId, $self) {
         var $name, t1, grid, t2, y, row, x, cell, t3, t4, t5, t6;
         $name = C.HtmlDocument_methods.createElement$1(document, "label");
@@ -12160,7 +12171,7 @@
         return grid;
       },
       _onMatchJoin$1: function(response) {
-        var t1, t2, playerHolder, currentPlayers, allPlayers, t3, t4, playerId, t5, player, t6, opponentHolder, message;
+        var t1, t2, playerHolder, opGrid, t3, currentPlayers, allPlayers, t4, playerId, t5, player, t6, opponentHolder, message;
         t1 = J.getInterceptor$asx(response);
         if (t1.$index(response, "hasError") !== true) {
           t2 = document.querySelector("#controls").style;
@@ -12173,7 +12184,12 @@
           t1 = this._renderGrid$4(playerHolder, t1.username, J.$index$asx(t1.account, "id"), true);
           this.grid = t1;
           J.set$className$x(t1, "playergrid online");
-          t1 = this.grids;
+          for (t1 = this.grids, t2 = t1.get$values(t1), t2 = t2.get$iterator(t2); t2.moveNext$0();) {
+            opGrid = t2.get$current();
+            t3 = J.getInterceptor$x(opGrid);
+            J.set$className$x(t3.get$parent(opGrid), "playerspot open");
+            J.clear$0$ax(J.get$children$x(t3.get$parent(opGrid)));
+          }
           t1.clear$0(0);
           currentPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "current");
           allPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "all");
@@ -12192,7 +12208,10 @@
                   if (!t4.containsKey$1(playerId))
                     t4.$indexSet(0, playerId, new X.FiveBomberOpponent(C.OpponentState_0));
                   t1.$indexSet(0, playerId, this._renderGrid$4(opponentHolder, J.$index$asx(t6.$index(player, "identity"), "username"), t6.$index(player, "account_id"), false));
-                  J.set$className$x(t1.$index(0, playerId), "playergrid offline");
+                  if (t1.containsKey$1(playerId)) {
+                    J.get$classes$x(t1.$index(0, playerId)).remove$1(0, "online");
+                    J.get$classes$x(t1.$index(0, playerId)).add$1(0, "offline");
+                  }
                   break;
                 }
               }
@@ -12267,6 +12286,10 @@
           t1 = J.getInterceptor$asx(payload);
           if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias))
             this._markPlayerLeftMatch$1(t1.$index(payload, "player"));
+        } else if (t1.$eq(cmd, "player-disconnected")) {
+          t1 = J.getInterceptor$asx(payload);
+          if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias))
+            this._markPlayerOffline$1(t1.$index(payload, "player"));
         } else if (t1.$eq(cmd, "send-simulation")) {
           if (J.$eq$(J.$index$asx(payload, "alias"), this.rtSessionAlias))
             P.print(payload);
@@ -12334,7 +12357,7 @@
                 if (0 >= t2)
                   return H.ioore(t1, 0);
                 if (J.$eq$(t1[0], J.$index$asx(this.player.account, "id")))
-                  this._setState$1(C.State_4);
+                  this.onWin$0();
                 else
                   this._setState$1(C.State_5);
               }
@@ -12409,6 +12432,11 @@
           return t1.$le();
         if (t1 <= 0)
           timer.cancel$0();
+      }
+    },
+    Game_onWin_closure: {
+      "^": "Closure:3;",
+      call$1: function(response) {
       }
     },
     Game__renderGrid_closure: {
