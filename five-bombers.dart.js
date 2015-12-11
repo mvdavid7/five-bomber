@@ -11562,15 +11562,16 @@
           if (this.match != null) {
             message = P.LinkedHashMap__makeLiteral(["cmd", "leave", "payload", P.LinkedHashMap__makeLiteral(["session", this.rtSessionAlias])]);
             this.hydraClient.wsSend$1(message);
+            this.hydraClient._request$4("matches/" + H.S(J.$index$asx(this.match, "id")) + "/leave", "PUT", P.LinkedHashMap__makeEmpty(), new Q.Game_findMatch_closure());
             this.match = null;
           }
           t1 = this.hydraClient;
-          t1._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.rtCluster]), new Q.Game_findMatch_closure(this, callback));
+          t1._request$4("matches/matchmaking/5-way/join", "PUT", P.LinkedHashMap__makeLiteral(["cluster", t1.rtCluster]), new Q.Game_findMatch_closure0(this, callback));
         } else
-          this.hydraLogin$2(P.LinkedHashMap__makeLiteral(["anonymous", true]), new Q.Game_findMatch_closure0(this, callback));
+          this.hydraLogin$2(P.LinkedHashMap__makeLiteral(["anonymous", true]), new Q.Game_findMatch_closure1(this, callback));
       },
       _onRtMessage$2: [function(cmd, payload) {
-        var t1, t2, player, t3, data, playerId, pos, x, y;
+        var t1, t2, player, t3, opponentHolder, data, playerId, pos, x, y;
         P.print(payload);
         t1 = J.getInterceptor(cmd);
         if (t1.$eq(cmd, "join")) {
@@ -11586,8 +11587,17 @@
           }
         } else if (t1.$eq(cmd, "player-joined")) {
           t1 = J.getInterceptor$asx(payload);
-          if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias))
-            this.grids.$indexSet(0, t1.$index(payload, "player"), this._renderGrid$4(document.querySelector("#opponentcolumn"), J.$index$asx(J.$index$asx(t1.$index(payload, "data"), "identity"), "username"), t1.$index(payload, "player"), false));
+          if (J.$eq$(t1.$index(payload, "alias"), this.rtSessionAlias)) {
+            player = t1.$index(payload, "player");
+            t2 = this.grids;
+            if (t2.containsKey$1(player))
+              J.set$className$x(t2.$index(0, player), "playergrid online");
+            else {
+              t3 = "#opponent" + (t2.get$length(t2) + 1);
+              opponentHolder = document.querySelector(t3);
+              t2.$indexSet(0, t1.$index(payload, "player"), this._renderGrid$4(opponentHolder, J.$index$asx(J.$index$asx(t1.$index(payload, "data"), "identity"), "username"), t1.$index(payload, "player"), false));
+            }
+          }
         } else if (t1.$eq(cmd, "send-simulation")) {
           if (J.$eq$(J.$index$asx(payload, "alias"), this.rtSessionAlias))
             P.print(payload);
@@ -11673,13 +11683,18 @@
       }, null, null, 2, 0, null, 0, "call"]
     },
     Game_findMatch_closure: {
+      "^": "Closure:3;",
+      call$1: function(response) {
+      }
+    },
+    Game_findMatch_closure0: {
       "^": "Closure:3;_game$_captured_this_0,_game$_captured_callback_1",
       call$1: function(response) {
         this._game$_captured_this_0._onMatchJoin$1(response);
         this._game$_captured_callback_1.call$1(response);
       }
     },
-    Game_findMatch_closure0: {
+    Game_findMatch_closure1: {
       "^": "Closure:3;_game$_captured_this_2,_game$_captured_callback_3",
       call$1: function(response) {
         var t1 = this._game$_captured_callback_3;
