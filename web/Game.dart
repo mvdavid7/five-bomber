@@ -119,16 +119,9 @@ class Game {
 
   void findMatch(HydraCallback callback) {
     if(isAuthenticated) {
-      if(match != null) {
-        Map message = {
-          'cmd': 'leave',
-          'payload': {
-            'session': this.rtSessionAlias
-          }
-        };
-        hydraClient.wsSend(message);
-        this.match = null;
-      }
+      leaveMatch((JsObject response) {
+        // Ignore this for now, we tried our best
+      });
 
       hydraClient.put('matches/matchmaking/5-way/join', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
         this._onMatchJoin(response);
@@ -180,7 +173,13 @@ class Game {
       }
     } else if(cmd == 'player-joined') {
       if(payload['alias'] == this.rtSessionAlias) {
-        this.grids[payload['player']] = _renderGrid(querySelector('#opponentcolumn'), payload['data']['identity']['username'], payload['player'],false);
+        String player = payload['player'];
+        if(this.grids.containsKey(player)) {
+          this.grids[player].className = 'playergrid online';
+        } else {
+          Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
+          this.grids[payload['player']] = _renderGrid(opponentHolder, payload['data']['identity']['username'], payload['player'], false);
+        }
       }
     } else if(cmd == 'send-simulation') {
       if(payload['alias'] == this.rtSessionAlias) {
@@ -247,7 +246,21 @@ class Game {
         }
       });
     }
+  }
 
+  void leaveMatch(HydraCallback callback) {
+    if(match != null) {
+      Map message = {
+        'cmd': 'leave',
+        'payload': {
+          'session': this.rtSessionAlias
+        }
+      };
+      hydraClient.wsSend(message);
+
+      hydraClient.put('matches/${match['id']}/leave', {}, callback);
+      this.match = null;
+    }
   }
 
   void hydraLogin(var auth, HydraCallback callback) {
