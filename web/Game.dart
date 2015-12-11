@@ -10,7 +10,7 @@ import 'Hydra.dart';
 import 'Player.dart';
 import 'Opponent.dart';
 
-enum State { Setup, Ready, Waiting, Turn, Finished}
+enum State { Setup, Ready, Waiting, Turn, Won, Lost}
 enum SpotState { Blank, Piece, Hit }
 
 class Game {
@@ -26,6 +26,7 @@ class Game {
 
   List<List<SpotState>> myGrid = new List();
   int piecesLeft = 4;
+  int hitsLeft = 4;
 
   List<String> turnOrder = new List();
   int turnIndex = -1;
@@ -84,7 +85,10 @@ class Game {
       case State.Turn:
         instr = 'FIRE';
         break;
-      case State.Finished:
+      case State.Won:
+        instr = 'WINNER';
+        break;
+      case State.Lost:
         instr = 'Done';
         break;
     }
@@ -127,17 +131,42 @@ class Game {
     }
   }
 
+  void _markPlayerLeftMatch(String playerId) {
+    _removeFromTurnOrder(playerId);
+
+    if(this.grids.containsKey(playerId)) {
+      Element opHolder = this.grids[playerId].parent;
+      opHolder.children.clear();
+      opHolder.classes.remove('taken');
+      opHolder.classes.add('open');
+      this.grids.remove(playerId);
+    }
+
+    if(this.opponents.containsKey(playerId)) {
+      this.opponents.remove(playerId);
+    }
+  }
+
   void _markPlayerOnline(Element opponentGrid, String playerId) {
     _markPlayerInMatch(opponentGrid.parent, playerId);
     opponentGrid.classes.remove('offline');
     opponentGrid.classes.add('online');
   }
 
+  void _removeFromTurnOrder(String playerId) {
+    String currentTurn = _getCurrentTurn();
+    this.turnOrder.remove(playerId);
+    if(currentTurn == playerId) {
+      this.turnIndex--;
+      this.nextTurn();
+    }
+  }
+
   void _setOpponentState(String playerId, OpponentState state) {
     this.opponents[playerId].state = state;
 
-    List<String> classes = ['setup', 'ready', 'turn'];
-    List<bool> enabled = [false, false, false];
+    List<String> classes = ['setup', 'ready', 'turn', 'dead'];
+    List<bool> enabled = [false, false, false, false];
     switch(state) {
       case OpponentState.Setup:
         enabled[0] = true;
@@ -148,9 +177,20 @@ class Game {
       case OpponentState.Turn:
         enabled[2] = true;
         break;
+      case OpponentState.Dead:
+        this._removeFromTurnOrder(playerId);
+        enabled[3] = true;
+        break;
     }
     for(int i = 0; i < classes.length; i++)
       this.grids[playerId].parent.classes.toggle(classes[i], enabled[i]);
+  }
+
+  String _getCurrentTurn() {
+    if(this.turnIndex >= 0)
+      return this.turnOrder[this.turnIndex];
+    else
+      return null;
   }
 
   void _checkGameStart() {
@@ -171,6 +211,15 @@ class Game {
     }
   }
 
+  void _checkGameEnd() {
+    if(this.turnOrder.length == 1) {
+      if(this.turnOrder[0] == this.player.account['id'])
+        onWin();
+      else
+        onLose();
+    }
+  }
+
   void onSetup() {
     this._setState(State.Setup);
     this._startTimer(20);
@@ -183,18 +232,14 @@ class Game {
       'type': 'ready',
       'player': player.account['id']
     });
-    this._checkGameStart();
   }
 
   void nextTurn() {
     this._setState(State.Waiting);
-    String turn;
+    String turn = _getCurrentTurn();
 
-    if(this.turnIndex >= 0) {
-      turn = this.turnOrder[this.turnIndex];
-      if(turn != this.player.account['id']) {
-        this._setOpponentState(turn, OpponentState.Ready);
-      }
+    if(turn != null && turn != this.player.account['id']) {
+      this._setOpponentState(turn, OpponentState.Ready);
     }
 
     this.turnIndex++;
@@ -211,6 +256,14 @@ class Game {
 
   void onTurn() {
     this._setState(State.Turn);
+  }
+
+  void onWin() {
+    this._setState(State.Won);
+  }
+
+  void onLose() {
+    this._setState(State.Lost);
   }
 
   TableElement _renderGrid(Element holder, String username, String accountId, bool self) {
@@ -371,6 +424,11 @@ class Game {
             _markPlayerOnline(this.grids[player['id']], player['id']);
         }
       }
+    } else if(cmd == 'notification') {
+      if(payload['cmd'] == 'leave' && payload['payload']['match']['id'] == this.rtSessionAlias) {
+        String player = payload['payload']['frm']['id'];
+        _markPlayerLeftMatch(player);
+      }
     } else if(cmd == 'player-joined') {
       if(payload['alias'] == this.rtSessionAlias) {
         String player = payload['player'];
@@ -379,6 +437,11 @@ class Game {
           this.grids[payload['player']] = _renderGrid(opponentHolder, payload['data']['identity']['username'], payload['player'], false);
         }
         _markPlayerOnline(this.grids[player], player);
+      }
+    } else if(cmd == 'player-leave') {
+      if(payload['alias'] == this.rtSessionAlias) {
+        String player = payload['player'];
+        _markPlayerLeftMatch(player);
       }
     } else if(cmd == 'send-simulation') {
       if(payload['alias'] == this.rtSessionAlias) {
@@ -395,11 +458,19 @@ class Game {
           if(playerId == this.player.account['id']) {
             if(this._getSpotState(x, y) == SpotState.Piece) {
               this._setSpotState(x, y, SpotState.Hit);
+              this.hitsLeft--;
               this._sendAllGameMessage({
                 'type': 'shot-hit',
                 'pos': {'x': x, 'y': y},
                 'player': playerId
               });
+
+              if(this.hitsLeft <=0) {
+                this._sendAllGameMessage({
+                  'type': 'player-dead',
+                  'player': playerId
+                });
+              }
             }
           } else if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'miss';
@@ -413,12 +484,19 @@ class Game {
           if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'hit';
           }
-        }  else if(data['type'] == 'ready') {
+        } else if(data['type'] == 'ready') {
           String playerId = data['player'];
           if(playerId != this.player.account['id']) {
             this._setOpponentState(playerId, OpponentState.Ready);
-            this._checkGameStart();
           }
+          this._checkGameStart();
+        } else if(data['type'] == 'player-dead') {
+          String playerId = data['player'];
+          this.turnOrder.remove(playerId);
+          if(playerId != this.player.account['id']) {
+            this._setOpponentState(playerId, OpponentState.Dead);
+          }
+          this._checkGameEnd();
         }
       }
     }
