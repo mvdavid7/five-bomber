@@ -599,7 +599,7 @@ class Game {
   }
 
   String getSavedAuthToken() {
-    String cookieName = 'five-bombers-auth-token=';
+    String cookieName = 'five-bombers-auth-token-${hydraClient.apiKey}=';
     List<String> ca = document.cookie.split(';');
     for (int i = 0; i < ca.length; i++) {
       String c = ca[i];
@@ -614,6 +614,6 @@ class Game {
   void saveAuthToken(String authToken) {
     DateTime today = new DateTime.now();
     DateTime expires = today.add(new Duration(days: 60));
-    document.cookie = 'five-bombers-auth-token=' + authToken + '; path=/; expires=' + expires.toString();
+    document.cookie = 'five-bombers-auth-token-${hydraClient.apiKey}=' + authToken + '; path=/; expires=' + expires.toString();
   }
 }

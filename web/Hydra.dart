@@ -14,6 +14,7 @@ class Hydra {
   String _realtimeConnectionId = null;
   RtMessageCallback onRtMessage = null;
   String rtCluster = null;
+  String apiKey = null;
 
   Hydra(var client) {
     _client = client;
@@ -22,6 +23,7 @@ class Hydra {
   operator [](attr) => _client[attr];
 
   void init(String url, String apiKey) {
+    this.apiKey = apiKey;
     _client.callMethod('init', [url, apiKey]);
   }
 
