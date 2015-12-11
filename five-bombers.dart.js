@@ -1524,7 +1524,7 @@
         message.fixed$length = Array;
         message[0] = J.toString$0$(error);
         message[1] = stackTrace == null ? null : J.toString$0$(stackTrace);
-        for (t2 = new P.LinkedHashSetIterator(t1, t1._collection$_modifications, null, null), t2._collection$_cell = t1._collection$_first; t2.moveNext$0();)
+        for (t2 = new P.LinkedHashSetIterator(t1, t1._collection$_modifications, null, null), t2._cell = t1._collection$_first; t2.moveNext$0();)
           J.send$1$x(t2._collection$_current, message);
       },
       eval$1: function(code) {
@@ -4021,7 +4021,7 @@
         var t1, t2;
         t1 = this.__js_helper$_map;
         t2 = new H.LinkedHashMapKeyIterator(t1, t1._modifications, null, null);
-        t2._cell = t1._first;
+        t2.__js_helper$_cell = t1._first;
         return t2;
       },
       forEach$1: function(_, f) {
@@ -4039,7 +4039,7 @@
       $isEfficientLength: 1
     },
     LinkedHashMapKeyIterator: {
-      "^": "Object;__js_helper$_map,_modifications,_cell,__js_helper$_current",
+      "^": "Object;__js_helper$_map,_modifications,__js_helper$_cell,__js_helper$_current",
       get$current: function() {
         return this.__js_helper$_current;
       },
@@ -4048,13 +4048,13 @@
         if (this._modifications !== t1._modifications)
           throw H.wrapException(new P.ConcurrentModificationError(t1));
         else {
-          t1 = this._cell;
+          t1 = this.__js_helper$_cell;
           if (t1 == null) {
             this.__js_helper$_current = null;
             return false;
           } else {
             this.__js_helper$_current = t1.hashMapCellKey;
-            this._cell = t1._next;
+            this.__js_helper$_cell = t1._next;
             return true;
           }
         }
@@ -6672,7 +6672,7 @@
       "^": "_HashSetBase;_collection$_length,_collection$_strings,_collection$_nums,_collection$_rest,_collection$_first,_collection$_last,_collection$_modifications",
       get$iterator: function(_) {
         var t1 = new P.LinkedHashSetIterator(this, this._collection$_modifications, null, null);
-        t1._collection$_cell = this._collection$_first;
+        t1._cell = this._collection$_first;
         return t1;
       },
       get$length: function(_) {
@@ -6896,7 +6896,7 @@
       "^": "Object;_collection$_element<,_collection$_next<,_collection$_previous@"
     },
     LinkedHashSetIterator: {
-      "^": "Object;_set,_collection$_modifications,_collection$_cell,_collection$_current",
+      "^": "Object;_set,_collection$_modifications,_cell,_collection$_current",
       get$current: function() {
         return this._collection$_current;
       },
@@ -6905,13 +6905,13 @@
         if (this._collection$_modifications !== t1._collection$_modifications)
           throw H.wrapException(new P.ConcurrentModificationError(t1));
         else {
-          t1 = this._collection$_cell;
+          t1 = this._cell;
           if (t1 == null) {
             this._collection$_current = null;
             return false;
           } else {
             this._collection$_current = t1.get$_collection$_element();
-            this._collection$_cell = this._collection$_cell.get$_collection$_next();
+            this._cell = this._cell.get$_collection$_next();
             return true;
           }
         }
@@ -11570,8 +11570,14 @@
         return C.Map_yT1Od.$index(0, this.index);
       }
     },
+    SpotState: {
+      "^": "Object;index",
+      toString$0: function(_) {
+        return C.Map_sgKYl.$index(0, this.index);
+      }
+    },
     Game: {
-      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,state,timerSeconds,isAuthenticated",
+      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,state,timerSeconds,myGrid,piecesLeft,isAuthenticated",
       _startTimer$1: function(seconds) {
         this.timerSeconds = seconds;
         document.querySelector("#timer").textContent = H.S(this.timerSeconds);
@@ -11599,10 +11605,41 @@
           default:
             instr = null;
         }
+        if (state === C.State_0)
+          J.get$classes$x(document.querySelector("#self .playergrid")).add$1(0, "setup");
+        else
+          J.get$classes$x(document.querySelector("#self .playergrid")).remove$1(0, "setup");
         document.querySelector("#instructions").textContent = instr;
       },
+      _setSpotState$3: function(x, y, state) {
+        var t1, cls;
+        t1 = this.myGrid;
+        if (y >>> 0 !== y || y >= t1.length)
+          return H.ioore(t1, y);
+        t1 = t1[y];
+        if (x >>> 0 !== x || x >= t1.length)
+          return H.ioore(t1, x);
+        t1[x] = state;
+        switch (state) {
+          case C.SpotState_0:
+            cls = "empty";
+            break;
+          case C.SpotState_1:
+            cls = "piece";
+            break;
+          case C.SpotState_2:
+            cls = "hit";
+            break;
+          default:
+            cls = null;
+        }
+        t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(this.grid), y))._list;
+        if (x >= t1.length)
+          return H.ioore(t1, x);
+        J.set$className$x(t1[x], cls);
+      },
       _renderGrid$4: function(holder, username, accountId, $self) {
-        var $name, t1, grid, t2, y, row, t3, x, cell, t4, t5, t6, t7;
+        var $name, t1, grid, t2, y, row, x, cell, t3, t4, t5, t6;
         $name = C.HtmlDocument_methods.createElement$1(document, "label");
         J.set$text$x($name, username);
         if ($self)
@@ -11614,23 +11651,21 @@
         t2.get$classes(grid).add$1(0, "playergrid");
         t1.get$children(holder).add$1(0, grid);
         t2.createTBody$0(grid);
-        for (t1 = !$self, y = 0; y < 4; ++y) {
+        for (y = 0; y < 4; ++y) {
           row = t2.insertRow$1(grid, -1);
-          for (t3 = J.getInterceptor$x(row), x = 0; x < 4; ++x) {
-            cell = t3.addCell$0(row);
-            cell.className = "empty" + ($self ? " opponent" : "");
-            if (t1) {
-              cell.toString;
-              t4 = C.EventStreamProvider_click.forElement$1(cell);
-              t4 = H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t4._html$_target, t4._eventType, W._wrapZone(new Q.Game__renderGrid_closure(this, accountId, y, x)), false), [H.getTypeArgumentByIndex(t4, 0)]);
-              t5 = t4._html$_onData;
-              t6 = t5 != null;
-              if (t6 && t4._pauseCount <= 0) {
-                t7 = t4._html$_target;
-                t7.toString;
-                if (t6)
-                  J._addEventListener$3$x(t7, t4._eventType, t5, false);
-              }
+          for (t1 = J.getInterceptor$x(row), x = 0; x < 4; ++x) {
+            cell = t1.addCell$0(row);
+            cell.className = "empty";
+            cell.toString;
+            t3 = C.EventStreamProvider_click.forElement$1(cell);
+            t3 = H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t3._html$_target, t3._eventType, W._wrapZone(new Q.Game__renderGrid_closure(this, accountId, $self, y, x)), false), [H.getTypeArgumentByIndex(t3, 0)]);
+            t4 = t3._html$_onData;
+            t5 = t4 != null;
+            if (t5 && t3._pauseCount <= 0) {
+              t6 = t3._html$_target;
+              t6.toString;
+              if (t5)
+                J._addEventListener$3$x(t6, t3._eventType, t4, false);
             }
           }
         }
@@ -11640,8 +11675,6 @@
         var t1, t2, playerHolder, currentPlayers, allPlayers, t3, playerId, t4, player, t5, opponentHolder, message;
         t1 = J.getInterceptor$asx(response);
         if (t1.$index(response, "hasError") !== true) {
-          this._setState$1(C.State_0);
-          this._startTimer$1(20);
           t2 = document.querySelector("#controls").style;
           t2.display = "inherit";
           this.match = C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [t1.$index(response, "data")]));
@@ -11652,7 +11685,6 @@
           t1 = this._renderGrid$4(playerHolder, t1.username, J.$index$asx(t1.account, "id"), true);
           this.grid = t1;
           J.set$className$x(t1, "playergrid online");
-          document.querySelector("#opponents");
           t1 = this.grids;
           t1.clear$0(0);
           currentPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "current");
@@ -11677,6 +11709,8 @@
           }
           message = P.LinkedHashMap__makeLiteral(["cmd", "join", "payload", P.LinkedHashMap__makeLiteral(["type", "match", "session", J.$index$asx(this.match, "id")])]);
           this.hydraClient.wsSend$1(message);
+          this._setState$1(C.State_0);
+          this._startTimer$1(20);
         }
       },
       findMatch$1: function(callback) {
@@ -11740,10 +11774,14 @@
               x = t1.$index(pos, "x");
               y = t1.$index(pos, "y");
               if (J.$eq$(playerId, J.$index$asx(this.player.account, "id"))) {
-                t1 = J.get$cells$x(J.$index$asx(J.get$rows$x(this.grid), y))._list;
+                t1 = this.myGrid;
+                if (y >>> 0 !== y || y >= t1.length)
+                  return H.ioore(t1, y);
+                t1 = t1[y];
                 if (x >>> 0 !== x || x >= t1.length)
                   return H.ioore(t1, x);
-                J.set$className$x(t1[x], "hit");
+                if (t1[x] === C.SpotState_1)
+                  this._setSpotState$3(x, y, C.SpotState_2);
               } else {
                 t1 = this.grids;
                 if (t1.$index(0, playerId) != null) {
@@ -11781,14 +11819,21 @@
         return;
       },
       Game$1: function(client) {
-        var authToken;
+        var t1, i, row, j, authToken;
         this.hydraClient = client;
+        for (t1 = this.myGrid, i = 0; i < 4; ++i) {
+          row = [];
+          for (j = 0; j < 4; ++j)
+            row.push(C.SpotState_0);
+          t1.push(row);
+        }
         authToken = this.getSavedAuthToken$0();
         if (authToken != null)
           this.hydraLogin$2(authToken, new Q.Game_closure());
       },
       static: {Game$: function(client) {
-          var t1 = new Q.Game(null, null, null, null, null, H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]), C.State_0, null, false);
+          var t1 = H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]);
+          t1 = new Q.Game(null, null, null, null, null, t1, C.State_0, null, [], 4, false);
           t1.Game$1(client);
           return t1;
         }}
@@ -11818,9 +11863,34 @@
       }
     },
     Game__renderGrid_closure: {
-      "^": "Closure:1;_game$_captured_this_0,_captured_accountId_1,_captured_y_2,_captured_x_3",
+      "^": "Closure:1;_game$_captured_this_0,_captured_accountId_1,_captured_self_2,_captured_y_3,_captured_x_4",
       call$1: [function(e) {
-        this._game$_captured_this_0._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_3, "y", this._captured_y_2]), "player", this._captured_accountId_1]));
+        var t1, t2, t3, t4;
+        if (!this._captured_self_2)
+          this._game$_captured_this_0._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_4, "y", this._captured_y_3]), "player", this._captured_accountId_1]));
+        else {
+          t1 = this._game$_captured_this_0;
+          if (t1.state === C.State_0) {
+            t2 = this._captured_x_4;
+            t3 = this._captured_y_3;
+            t4 = t1.myGrid;
+            if (t3 >= t4.length)
+              return H.ioore(t4, t3);
+            t4 = t4[t3];
+            if (t2 >= t4.length)
+              return H.ioore(t4, t2);
+            t4 = t4[t2];
+            if (t4 === C.SpotState_0) {
+              if (t1.piecesLeft > 0) {
+                t1._setSpotState$3(t2, t3, C.SpotState_1);
+                --t1.piecesLeft;
+              }
+            } else if (t4 === C.SpotState_1) {
+              t1._setSpotState$3(t2, t3, C.SpotState_0);
+              ++t1.piecesLeft;
+            }
+          }
+        }
       }, null, null, 2, 0, null, 0, "call"]
     },
     Game_findMatch_closure: {
@@ -12066,7 +12136,7 @@
         var t1, t2;
         t1 = this.readClasses$0();
         t2 = new P.LinkedHashSetIterator(t1, t1._collection$_modifications, null, null);
-        t2._collection$_cell = t1._collection$_first;
+        t2._cell = t1._collection$_first;
         return t2;
       },
       forEach$1: function(_, f) {
@@ -12466,6 +12536,9 @@
   J.get$children$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$children(receiver);
   };
+  J.get$classes$x = function(receiver) {
+    return J.getInterceptor$x(receiver).get$classes(receiver);
+  };
   J.get$data$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$data(receiver);
   };
@@ -12790,7 +12863,11 @@
   C.List_qg4 = Isolate.makeConstantList([0, 0, 65490, 12287, 65535, 34815, 65534, 18431]);
   C.List_empty0 = H.setRuntimeTypeInfo(Isolate.makeConstantList([]), [P.Symbol]);
   C.Map_empty = H.setRuntimeTypeInfo(new H.ConstantStringMap(0, {}, C.List_empty0), [P.Symbol, null]);
+  C.Map_sgKYl = new H.GeneralConstantMap([0, "SpotState.Blank", 1, "SpotState.Piece", 2, "SpotState.Hit"]);
   C.Map_yT1Od = new H.GeneralConstantMap([0, "State.Setup", 1, "State.Ready", 2, "State.Waiting", 3, "State.Turn", 4, "State.Finished"]);
+  C.SpotState_0 = new Q.SpotState(0);
+  C.SpotState_1 = new Q.SpotState(1);
+  C.SpotState_2 = new Q.SpotState(2);
   C.State_0 = new Q.State(0);
   C.State_1 = new Q.State(1);
   C.State_2 = new Q.State(2);
