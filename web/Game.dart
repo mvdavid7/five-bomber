@@ -241,7 +241,9 @@ class Game {
   }
 
   void nextTurn() {
-    this._setState(State.Waiting);
+    if(this.state != State.Lost)
+      this._setState(State.Waiting);
+
     String turn = _getCurrentTurn();
 
     if(turn != null && turn != this.player.account['id']) {
