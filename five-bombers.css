@@ -25,6 +25,8 @@ h1 {
 
 #opponents .playerspot { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 #opponents .open { background-color: #F0F0F0; }
+#opponents .ready { background-color: lightblue; }
+#opponents .turn { background-color: lightyellow; }
 
 #player .blank { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 

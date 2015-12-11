@@ -743,6 +743,15 @@
             receiver[start + i] = iterable[t1];
           }
       },
+      sort$1: function(receiver, compare) {
+        var t1;
+        this.checkMutable$1(receiver, "sort");
+        t1 = P.core_Comparable_compare$closure();
+        H.Sort__doSort(receiver, 0, receiver.length - 1, t1);
+      },
+      sort$0: function($receiver) {
+        return this.sort$1($receiver, null);
+      },
       indexOf$2: function(receiver, element, start) {
         var i;
         if (start >= receiver.length)
@@ -824,6 +833,37 @@
     },
     JSNumber: {
       "^": "Interceptor;",
+      compareTo$1: function(receiver, b) {
+        var bIsNegative;
+        if (typeof b !== "number")
+          throw H.wrapException(H.argumentErrorValue(b));
+        if (receiver < b)
+          return -1;
+        else if (receiver > b)
+          return 1;
+        else if (receiver === b) {
+          if (receiver === 0) {
+            bIsNegative = this.get$isNegative(b);
+            if (this.get$isNegative(receiver) === bIsNegative)
+              return 0;
+            if (this.get$isNegative(receiver))
+              return -1;
+            return 1;
+          }
+          return 0;
+        } else if (isNaN(receiver)) {
+          if (this.get$isNaN(b))
+            return 0;
+          return 1;
+        } else
+          return -1;
+      },
+      get$isNegative: function(receiver) {
+        return receiver === 0 ? 1 / receiver < 0 : receiver < 0;
+      },
+      get$isNaN: function(receiver) {
+        return isNaN(receiver);
+      },
       get$isFinite: function(receiver) {
         return isFinite(receiver);
       },
@@ -1091,6 +1131,16 @@
       },
       get$isEmpty: function(receiver) {
         return receiver.length === 0;
+      },
+      compareTo$1: function(receiver, other) {
+        var t1;
+        if (typeof other !== "string")
+          throw H.wrapException(H.argumentErrorValue(other));
+        if (receiver === other)
+          t1 = 0;
+        else
+          t1 = receiver < other ? -1 : 1;
+        return t1;
       },
       toString$0: function(receiver) {
         return receiver;
@@ -1524,7 +1574,7 @@
         message.fixed$length = Array;
         message[0] = J.toString$0$(error);
         message[1] = stackTrace == null ? null : J.toString$0$(stackTrace);
-        for (t2 = new P.LinkedHashSetIterator(t1, t1._collection$_modifications, null, null), t2._cell = t1._collection$_first; t2.moveNext$0();)
+        for (t2 = new P.LinkedHashSetIterator(t1, t1._modifications, null, null), t2._cell = t1._first; t2.moveNext$0();)
           J.send$1$x(t2._collection$_current, message);
       },
       eval$1: function(code) {
@@ -1896,10 +1946,10 @@
         }}
     },
     TimerImpl_internalCallback: {
-      "^": "Closure:2;__isolate_helper$_captured_this_0,__isolate_helper$_captured_callback_1",
+      "^": "Closure:2;__isolate_helper$_captured_this_0,_captured_callback_1",
       call$0: function() {
         this.__isolate_helper$_captured_this_0._handle = null;
-        this.__isolate_helper$_captured_callback_1.call$0();
+        this._captured_callback_1.call$0();
       }
     },
     TimerImpl_internalCallback0: {
@@ -1911,9 +1961,9 @@
       }, null, null, 0, 0, null, "call"]
     },
     TimerImpl$periodic_closure: {
-      "^": "Closure:0;__isolate_helper$_captured_this_0,__isolate_helper$_captured_callback_1",
+      "^": "Closure:0;__isolate_helper$_captured_this_0,_captured_callback_1",
       call$0: [function() {
-        this.__isolate_helper$_captured_callback_1.call$1(this.__isolate_helper$_captured_this_0);
+        this._captured_callback_1.call$1(this.__isolate_helper$_captured_this_0);
       }, null, null, 0, 0, null, "call"]
     },
     CapabilityImpl: {
@@ -3774,7 +3824,7 @@
       }
     },
     JsLinkedHashMap: {
-      "^": "Object;__js_helper$_length,_strings,_nums,_rest,_first,_last,_modifications",
+      "^": "Object;__js_helper$_length,__js_helper$_strings,__js_helper$_nums,__js_helper$_rest,__js_helper$_first,__js_helper$_last,__js_helper$_modifications",
       get$length: function(_) {
         return this.__js_helper$_length;
       },
@@ -3790,12 +3840,12 @@
       containsKey$1: function(key) {
         var strings, nums;
         if (typeof key === "string") {
-          strings = this._strings;
+          strings = this.__js_helper$_strings;
           if (strings == null)
             return false;
           return this._containsTableEntry$2(strings, key);
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._nums;
+          nums = this.__js_helper$_nums;
           if (nums == null)
             return false;
           return this._containsTableEntry$2(nums, key);
@@ -3803,7 +3853,7 @@
           return this.internalContainsKey$1(key);
       },
       internalContainsKey$1: function(key) {
-        var rest = this._rest;
+        var rest = this.__js_helper$_rest;
         if (rest == null)
           return false;
         return this.internalFindBucketIndex$2(this._getTableEntry$2(rest, this.internalComputeHashCode$1(key)), key) >= 0;
@@ -3811,13 +3861,13 @@
       $index: function(_, key) {
         var strings, cell, nums;
         if (typeof key === "string") {
-          strings = this._strings;
+          strings = this.__js_helper$_strings;
           if (strings == null)
             return;
           cell = this._getTableEntry$2(strings, key);
           return cell == null ? null : cell.get$hashMapCellValue();
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._nums;
+          nums = this.__js_helper$_nums;
           if (nums == null)
             return;
           cell = this._getTableEntry$2(nums, key);
@@ -3827,7 +3877,7 @@
       },
       internalGet$1: function(key) {
         var rest, bucket, index;
-        rest = this._rest;
+        rest = this.__js_helper$_rest;
         if (rest == null)
           return;
         bucket = this._getTableEntry$2(rest, this.internalComputeHashCode$1(key));
@@ -3839,49 +3889,49 @@
       $indexSet: function(_, key, value) {
         var strings, nums, rest, hash, bucket, index;
         if (typeof key === "string") {
-          strings = this._strings;
+          strings = this.__js_helper$_strings;
           if (strings == null) {
             strings = this._newHashTable$0();
-            this._strings = strings;
+            this.__js_helper$_strings = strings;
           }
-          this._addHashTableEntry$3(strings, key, value);
+          this.__js_helper$_addHashTableEntry$3(strings, key, value);
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._nums;
+          nums = this.__js_helper$_nums;
           if (nums == null) {
             nums = this._newHashTable$0();
-            this._nums = nums;
+            this.__js_helper$_nums = nums;
           }
-          this._addHashTableEntry$3(nums, key, value);
+          this.__js_helper$_addHashTableEntry$3(nums, key, value);
         } else {
-          rest = this._rest;
+          rest = this.__js_helper$_rest;
           if (rest == null) {
             rest = this._newHashTable$0();
-            this._rest = rest;
+            this.__js_helper$_rest = rest;
           }
           hash = this.internalComputeHashCode$1(key);
           bucket = this._getTableEntry$2(rest, hash);
           if (bucket == null)
-            this._setTableEntry$3(rest, hash, [this._newLinkedCell$2(key, value)]);
+            this._setTableEntry$3(rest, hash, [this.__js_helper$_newLinkedCell$2(key, value)]);
           else {
             index = this.internalFindBucketIndex$2(bucket, key);
             if (index >= 0)
               bucket[index].set$hashMapCellValue(value);
             else
-              bucket.push(this._newLinkedCell$2(key, value));
+              bucket.push(this.__js_helper$_newLinkedCell$2(key, value));
           }
         }
       },
       remove$1: function(_, key) {
         if (typeof key === "string")
-          return this.__js_helper$_removeHashTableEntry$2(this._strings, key);
+          return this.__js_helper$_removeHashTableEntry$2(this.__js_helper$_strings, key);
         else if (typeof key === "number" && (key & 0x3ffffff) === key)
-          return this.__js_helper$_removeHashTableEntry$2(this._nums, key);
+          return this.__js_helper$_removeHashTableEntry$2(this.__js_helper$_nums, key);
         else
           return this.internalRemove$1(key);
       },
       internalRemove$1: function(key) {
         var rest, bucket, index, cell;
-        rest = this._rest;
+        rest = this.__js_helper$_rest;
         if (rest == null)
           return;
         bucket = this._getTableEntry$2(rest, this.internalComputeHashCode$1(key));
@@ -3894,30 +3944,30 @@
       },
       clear$0: function(_) {
         if (this.__js_helper$_length > 0) {
-          this._last = null;
-          this._first = null;
-          this._rest = null;
-          this._nums = null;
-          this._strings = null;
+          this.__js_helper$_last = null;
+          this.__js_helper$_first = null;
+          this.__js_helper$_rest = null;
+          this.__js_helper$_nums = null;
+          this.__js_helper$_strings = null;
           this.__js_helper$_length = 0;
-          this._modifications = this._modifications + 1 & 67108863;
+          this.__js_helper$_modifications = this.__js_helper$_modifications + 1 & 67108863;
         }
       },
       forEach$1: function(_, action) {
         var cell, modifications;
-        cell = this._first;
-        modifications = this._modifications;
+        cell = this.__js_helper$_first;
+        modifications = this.__js_helper$_modifications;
         for (; cell != null;) {
           action.call$2(cell.hashMapCellKey, cell.hashMapCellValue);
-          if (modifications !== this._modifications)
+          if (modifications !== this.__js_helper$_modifications)
             throw H.wrapException(new P.ConcurrentModificationError(this));
-          cell = cell._next;
+          cell = cell.__js_helper$_next;
         }
       },
-      _addHashTableEntry$3: function(table, key, value) {
+      __js_helper$_addHashTableEntry$3: function(table, key, value) {
         var cell = this._getTableEntry$2(table, key);
         if (cell == null)
-          this._setTableEntry$3(table, key, this._newLinkedCell$2(key, value));
+          this._setTableEntry$3(table, key, this.__js_helper$_newLinkedCell$2(key, value));
         else
           cell.set$hashMapCellValue(value);
       },
@@ -3932,36 +3982,36 @@
         this._deleteTableEntry$2(table, key);
         return cell.get$hashMapCellValue();
       },
-      _newLinkedCell$2: function(key, value) {
+      __js_helper$_newLinkedCell$2: function(key, value) {
         var cell, last;
         cell = new H.LinkedHashMapCell(key, value, null, null);
-        if (this._first == null) {
-          this._last = cell;
-          this._first = cell;
+        if (this.__js_helper$_first == null) {
+          this.__js_helper$_last = cell;
+          this.__js_helper$_first = cell;
         } else {
-          last = this._last;
-          cell._previous = last;
-          last._next = cell;
-          this._last = cell;
+          last = this.__js_helper$_last;
+          cell.__js_helper$_previous = last;
+          last.__js_helper$_next = cell;
+          this.__js_helper$_last = cell;
         }
         ++this.__js_helper$_length;
-        this._modifications = this._modifications + 1 & 67108863;
+        this.__js_helper$_modifications = this.__js_helper$_modifications + 1 & 67108863;
         return cell;
       },
       __js_helper$_unlinkCell$1: function(cell) {
         var previous, next;
-        previous = cell.get$_previous();
-        next = cell.get$_next();
+        previous = cell.get$__js_helper$_previous();
+        next = cell.get$__js_helper$_next();
         if (previous == null)
-          this._first = next;
+          this.__js_helper$_first = next;
         else
-          previous._next = next;
+          previous.__js_helper$_next = next;
         if (next == null)
-          this._last = previous;
+          this.__js_helper$_last = previous;
         else
-          next._previous = previous;
+          next.__js_helper$_previous = previous;
         --this.__js_helper$_length;
-        this._modifications = this._modifications + 1 & 67108863;
+        this.__js_helper$_modifications = this.__js_helper$_modifications + 1 & 67108863;
       },
       internalComputeHashCode$1: function(key) {
         return J.get$hashCode$(key) & 0x3ffffff;
@@ -4001,13 +4051,13 @@
       $isMap: 1
     },
     JsLinkedHashMap_values_closure: {
-      "^": "Closure:1;__js_helper$_captured_this_0",
+      "^": "Closure:1;_captured_this_0",
       call$1: [function(each) {
-        return this.__js_helper$_captured_this_0.$index(0, each);
+        return this._captured_this_0.$index(0, each);
       }, null, null, 2, 0, null, 20, "call"]
     },
     LinkedHashMapCell: {
-      "^": "Object;hashMapCellKey<,hashMapCellValue@,_next<,_previous<"
+      "^": "Object;hashMapCellKey<,hashMapCellValue@,__js_helper$_next<,__js_helper$_previous<"
     },
     LinkedHashMapKeyIterable: {
       "^": "Iterable;__js_helper$_map",
@@ -4020,32 +4070,32 @@
       get$iterator: function(_) {
         var t1, t2;
         t1 = this.__js_helper$_map;
-        t2 = new H.LinkedHashMapKeyIterator(t1, t1._modifications, null, null);
-        t2.__js_helper$_cell = t1._first;
+        t2 = new H.LinkedHashMapKeyIterator(t1, t1.__js_helper$_modifications, null, null);
+        t2.__js_helper$_cell = t1.__js_helper$_first;
         return t2;
       },
       forEach$1: function(_, f) {
         var t1, cell, modifications;
         t1 = this.__js_helper$_map;
-        cell = t1._first;
-        modifications = t1._modifications;
+        cell = t1.__js_helper$_first;
+        modifications = t1.__js_helper$_modifications;
         for (; cell != null;) {
           f.call$1(cell.hashMapCellKey);
-          if (modifications !== t1._modifications)
+          if (modifications !== t1.__js_helper$_modifications)
             throw H.wrapException(new P.ConcurrentModificationError(t1));
-          cell = cell._next;
+          cell = cell.__js_helper$_next;
         }
       },
       $isEfficientLength: 1
     },
     LinkedHashMapKeyIterator: {
-      "^": "Object;__js_helper$_map,_modifications,__js_helper$_cell,__js_helper$_current",
+      "^": "Object;__js_helper$_map,__js_helper$_modifications,__js_helper$_cell,__js_helper$_current",
       get$current: function() {
         return this.__js_helper$_current;
       },
       moveNext$0: function() {
         var t1 = this.__js_helper$_map;
-        if (this._modifications !== t1._modifications)
+        if (this.__js_helper$_modifications !== t1.__js_helper$_modifications)
           throw H.wrapException(new P.ConcurrentModificationError(t1));
         else {
           t1 = this.__js_helper$_cell;
@@ -4054,7 +4104,7 @@
             return false;
           } else {
             this.__js_helper$_current = t1.hashMapCellKey;
-            this.__js_helper$_cell = t1._next;
+            this.__js_helper$_cell = t1.__js_helper$_next;
             return true;
           }
         }
@@ -4155,6 +4205,217 @@
     },
     IterableElementError_tooFew: function() {
       return new P.StateError("Too few elements");
+    },
+    Sort__doSort: function(a, left, right, compare) {
+      if (right - left <= 32)
+        H.Sort__insertionSort(a, left, right, compare);
+      else
+        H.Sort__dualPivotQuicksort(a, left, right, compare);
+    },
+    Sort__insertionSort: function(a, left, right, compare) {
+      var i, t1, el, j, j0;
+      for (i = left + 1, t1 = J.getInterceptor$asx(a); i <= right; ++i) {
+        el = t1.$index(a, i);
+        j = i;
+        while (true) {
+          if (!(j > left && J.$gt$n(compare.call$2(t1.$index(a, j - 1), el), 0)))
+            break;
+          j0 = j - 1;
+          t1.$indexSet(a, j, t1.$index(a, j0));
+          j = j0;
+        }
+        t1.$indexSet(a, j, el);
+      }
+    },
+    Sort__dualPivotQuicksort: function(a, left, right, compare) {
+      var sixth, index1, index5, index3, index2, index4, t1, el1, el2, el3, el4, el5, t0, less, great, k, ak, comp, t2, great0, less0, pivots_are_equal;
+      sixth = C.JSInt_methods._tdivFast$1(right - left + 1, 6);
+      index1 = left + sixth;
+      index5 = right - sixth;
+      index3 = C.JSInt_methods._tdivFast$1(left + right, 2);
+      index2 = index3 - sixth;
+      index4 = index3 + sixth;
+      t1 = J.getInterceptor$asx(a);
+      el1 = t1.$index(a, index1);
+      el2 = t1.$index(a, index2);
+      el3 = t1.$index(a, index3);
+      el4 = t1.$index(a, index4);
+      el5 = t1.$index(a, index5);
+      if (J.$gt$n(compare.call$2(el1, el2), 0)) {
+        t0 = el2;
+        el2 = el1;
+        el1 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el4, el5), 0)) {
+        t0 = el5;
+        el5 = el4;
+        el4 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el1, el3), 0)) {
+        t0 = el3;
+        el3 = el1;
+        el1 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el2, el3), 0)) {
+        t0 = el3;
+        el3 = el2;
+        el2 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el1, el4), 0)) {
+        t0 = el4;
+        el4 = el1;
+        el1 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el3, el4), 0)) {
+        t0 = el4;
+        el4 = el3;
+        el3 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el2, el5), 0)) {
+        t0 = el5;
+        el5 = el2;
+        el2 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el2, el3), 0)) {
+        t0 = el3;
+        el3 = el2;
+        el2 = t0;
+      }
+      if (J.$gt$n(compare.call$2(el4, el5), 0)) {
+        t0 = el5;
+        el5 = el4;
+        el4 = t0;
+      }
+      t1.$indexSet(a, index1, el1);
+      t1.$indexSet(a, index3, el3);
+      t1.$indexSet(a, index5, el5);
+      t1.$indexSet(a, index2, t1.$index(a, left));
+      t1.$indexSet(a, index4, t1.$index(a, right));
+      less = left + 1;
+      great = right - 1;
+      if (J.$eq$(compare.call$2(el2, el4), 0)) {
+        for (k = less; k <= great; ++k) {
+          ak = t1.$index(a, k);
+          comp = compare.call$2(ak, el2);
+          t2 = J.getInterceptor(comp);
+          if (t2.$eq(comp, 0))
+            continue;
+          if (t2.$lt(comp, 0)) {
+            if (k !== less) {
+              t1.$indexSet(a, k, t1.$index(a, less));
+              t1.$indexSet(a, less, ak);
+            }
+            ++less;
+          } else
+            for (; true;) {
+              comp = compare.call$2(t1.$index(a, great), el2);
+              t2 = J.getInterceptor$n(comp);
+              if (t2.$gt(comp, 0)) {
+                --great;
+                continue;
+              } else {
+                great0 = great - 1;
+                if (t2.$lt(comp, 0)) {
+                  t1.$indexSet(a, k, t1.$index(a, less));
+                  less0 = less + 1;
+                  t1.$indexSet(a, less, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                  great = great0;
+                  less = less0;
+                  break;
+                } else {
+                  t1.$indexSet(a, k, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                  great = great0;
+                  break;
+                }
+              }
+            }
+        }
+        pivots_are_equal = true;
+      } else {
+        for (k = less; k <= great; ++k) {
+          ak = t1.$index(a, k);
+          if (J.$lt$n(compare.call$2(ak, el2), 0)) {
+            if (k !== less) {
+              t1.$indexSet(a, k, t1.$index(a, less));
+              t1.$indexSet(a, less, ak);
+            }
+            ++less;
+          } else if (J.$gt$n(compare.call$2(ak, el4), 0))
+            for (; true;)
+              if (J.$gt$n(compare.call$2(t1.$index(a, great), el4), 0)) {
+                --great;
+                if (great < k)
+                  break;
+                continue;
+              } else {
+                great0 = great - 1;
+                if (J.$lt$n(compare.call$2(t1.$index(a, great), el2), 0)) {
+                  t1.$indexSet(a, k, t1.$index(a, less));
+                  less0 = less + 1;
+                  t1.$indexSet(a, less, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                  less = less0;
+                } else {
+                  t1.$indexSet(a, k, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                }
+                great = great0;
+                break;
+              }
+        }
+        pivots_are_equal = false;
+      }
+      t2 = less - 1;
+      t1.$indexSet(a, left, t1.$index(a, t2));
+      t1.$indexSet(a, t2, el2);
+      t2 = great + 1;
+      t1.$indexSet(a, right, t1.$index(a, t2));
+      t1.$indexSet(a, t2, el4);
+      H.Sort__doSort(a, left, less - 2, compare);
+      H.Sort__doSort(a, great + 2, right, compare);
+      if (pivots_are_equal)
+        return;
+      if (less < index1 && great > index5) {
+        for (; J.$eq$(compare.call$2(t1.$index(a, less), el2), 0);)
+          ++less;
+        for (; J.$eq$(compare.call$2(t1.$index(a, great), el4), 0);)
+          --great;
+        for (k = less; k <= great; ++k) {
+          ak = t1.$index(a, k);
+          if (J.$eq$(compare.call$2(ak, el2), 0)) {
+            if (k !== less) {
+              t1.$indexSet(a, k, t1.$index(a, less));
+              t1.$indexSet(a, less, ak);
+            }
+            ++less;
+          } else if (J.$eq$(compare.call$2(ak, el4), 0))
+            for (; true;)
+              if (J.$eq$(compare.call$2(t1.$index(a, great), el4), 0)) {
+                --great;
+                if (great < k)
+                  break;
+                continue;
+              } else {
+                great0 = great - 1;
+                if (J.$lt$n(compare.call$2(t1.$index(a, great), el2), 0)) {
+                  t1.$indexSet(a, k, t1.$index(a, less));
+                  less0 = less + 1;
+                  t1.$indexSet(a, less, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                  less = less0;
+                } else {
+                  t1.$indexSet(a, k, t1.$index(a, great));
+                  t1.$indexSet(a, great, ak);
+                }
+                great = great0;
+                break;
+              }
+        }
+        H.Sort__doSort(a, less, great, compare);
+      } else
+        H.Sort__doSort(a, less, great, compare);
     },
     CodeUnits: {
       "^": "UnmodifiableListBase;_string",
@@ -4773,17 +5034,17 @@
       }
     },
     _AsyncRun__scheduleImmediateJsOverride_internalCallback: {
-      "^": "Closure:0;_async$_captured_callback_0",
+      "^": "Closure:0;_captured_callback_0",
       call$0: [function() {
         --init.globalState.topEventLoop._activeJsAsyncCount;
-        this._async$_captured_callback_0.call$0();
+        this._captured_callback_0.call$0();
       }, null, null, 0, 0, null, "call"]
     },
     _AsyncRun__scheduleImmediateWithSetImmediate_internalCallback: {
-      "^": "Closure:0;_async$_captured_callback_0",
+      "^": "Closure:0;_captured_callback_0",
       call$0: [function() {
         --init.globalState.topEventLoop._activeJsAsyncCount;
-        this._async$_captured_callback_0.call$0();
+        this._captured_callback_0.call$0();
       }, null, null, 0, 0, null, "call"]
     },
     Future: {
@@ -4815,7 +5076,7 @@
       }
     },
     _FutureListener: {
-      "^": "Object;_nextListener@,result>,state,callback,errorCallback",
+      "^": "Object;_nextListener@,result>,state>,callback,errorCallback",
       get$_zone: function() {
         return this.result.get$_zone();
       },
@@ -6426,16 +6687,16 @@
       containsKey$1: function(key) {
         var strings, nums;
         if (typeof key === "string" && key !== "__proto__") {
-          strings = this._collection$_strings;
+          strings = this._strings;
           return strings == null ? false : strings[key] != null;
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._collection$_nums;
+          nums = this._nums;
           return nums == null ? false : nums[key] != null;
         } else
           return this._containsKey$1(key);
       },
       _containsKey$1: function(key) {
-        var rest = this._collection$_rest;
+        var rest = this._rest;
         if (rest == null)
           return false;
         return this._findBucketIndex$2(rest[this._computeHashCode$1(key)], key) >= 0;
@@ -6443,7 +6704,7 @@
       $index: function(_, key) {
         var strings, t1, entry, nums;
         if (typeof key === "string" && key !== "__proto__") {
-          strings = this._collection$_strings;
+          strings = this._strings;
           if (strings == null)
             t1 = null;
           else {
@@ -6452,7 +6713,7 @@
           }
           return t1;
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._collection$_nums;
+          nums = this._nums;
           if (nums == null)
             t1 = null;
           else {
@@ -6465,7 +6726,7 @@
       },
       _get$1: function(key) {
         var rest, bucket, index;
-        rest = this._collection$_rest;
+        rest = this._rest;
         if (rest == null)
           return;
         bucket = rest[this._computeHashCode$1(key)];
@@ -6475,24 +6736,24 @@
       $indexSet: function(_, key, value) {
         var strings, nums, rest, hash, bucket, index;
         if (typeof key === "string" && key !== "__proto__") {
-          strings = this._collection$_strings;
+          strings = this._strings;
           if (strings == null) {
             strings = P._HashMap__newHashTable();
-            this._collection$_strings = strings;
+            this._strings = strings;
           }
-          this._collection$_addHashTableEntry$3(strings, key, value);
+          this._addHashTableEntry$3(strings, key, value);
         } else if (typeof key === "number" && (key & 0x3ffffff) === key) {
-          nums = this._collection$_nums;
+          nums = this._nums;
           if (nums == null) {
             nums = P._HashMap__newHashTable();
-            this._collection$_nums = nums;
+            this._nums = nums;
           }
-          this._collection$_addHashTableEntry$3(nums, key, value);
+          this._addHashTableEntry$3(nums, key, value);
         } else {
-          rest = this._collection$_rest;
+          rest = this._rest;
           if (rest == null) {
             rest = P._HashMap__newHashTable();
-            this._collection$_rest = rest;
+            this._rest = rest;
           }
           hash = this._computeHashCode$1(key);
           bucket = rest[hash];
@@ -6529,7 +6790,7 @@
           return t1;
         result = new Array(this._collection$_length);
         result.fixed$length = Array;
-        strings = this._collection$_strings;
+        strings = this._strings;
         if (strings != null) {
           names = Object.getOwnPropertyNames(strings);
           entries = names.length;
@@ -6539,7 +6800,7 @@
           }
         } else
           index = 0;
-        nums = this._collection$_nums;
+        nums = this._nums;
         if (nums != null) {
           names = Object.getOwnPropertyNames(nums);
           entries = names.length;
@@ -6548,7 +6809,7 @@
             ++index;
           }
         }
-        rest = this._collection$_rest;
+        rest = this._rest;
         if (rest != null) {
           names = Object.getOwnPropertyNames(rest);
           entries = names.length;
@@ -6564,7 +6825,7 @@
         this._collection$_keys = result;
         return result;
       },
-      _collection$_addHashTableEntry$3: function(table, key, value) {
+      _addHashTableEntry$3: function(table, key, value) {
         if (table[key] == null) {
           ++this._collection$_length;
           this._collection$_keys = null;
@@ -6587,7 +6848,7 @@
       $isMap: 1
     },
     _IdentityHashMap: {
-      "^": "_HashMap;_collection$_length,_collection$_strings,_collection$_nums,_collection$_rest,_collection$_keys",
+      "^": "_HashMap;_collection$_length,_strings,_nums,_rest,_collection$_keys",
       _computeHashCode$1: function(key) {
         return H.objectHashCode(key) & 0x3ffffff;
       },
@@ -6651,7 +6912,7 @@
       }
     },
     _LinkedIdentityHashMap: {
-      "^": "JsLinkedHashMap;__js_helper$_length,_strings,_nums,_rest,_first,_last,_modifications",
+      "^": "JsLinkedHashMap;__js_helper$_length,__js_helper$_strings,__js_helper$_nums,__js_helper$_rest,__js_helper$_first,__js_helper$_last,__js_helper$_modifications",
       internalComputeHashCode$1: function(key) {
         return H.objectHashCode(key) & 0x3ffffff;
       },
@@ -6672,10 +6933,10 @@
         }}
     },
     _LinkedHashSet: {
-      "^": "_HashSetBase;_collection$_length,_collection$_strings,_collection$_nums,_collection$_rest,_collection$_first,_collection$_last,_collection$_modifications",
+      "^": "_HashSetBase;_collection$_length,_strings,_nums,_rest,_first,_last,_modifications",
       get$iterator: function(_) {
-        var t1 = new P.LinkedHashSetIterator(this, this._collection$_modifications, null, null);
-        t1._cell = this._collection$_first;
+        var t1 = new P.LinkedHashSetIterator(this, this._modifications, null, null);
+        t1._cell = this._first;
         return t1;
       },
       get$length: function(_) {
@@ -6687,12 +6948,12 @@
       contains$1: function(_, object) {
         var strings, nums;
         if (typeof object === "string" && object !== "__proto__") {
-          strings = this._collection$_strings;
+          strings = this._strings;
           if (strings == null)
             return false;
           return strings[object] != null;
         } else if (typeof object === "number" && (object & 0x3ffffff) === object) {
-          nums = this._collection$_nums;
+          nums = this._nums;
           if (nums == null)
             return false;
           return nums[object] != null;
@@ -6700,7 +6961,7 @@
           return this._contains$1(object);
       },
       _contains$1: function(object) {
-        var rest = this._collection$_rest;
+        var rest = this._rest;
         if (rest == null)
           return false;
         return this._findBucketIndex$2(rest[this._computeHashCode$1(object)], object) >= 0;
@@ -6718,7 +6979,7 @@
       },
       _lookup$1: function(object) {
         var rest, bucket, index;
-        rest = this._collection$_rest;
+        rest = this._rest;
         if (rest == null)
           return;
         bucket = rest[this._computeHashCode$1(object)];
@@ -6729,23 +6990,23 @@
       },
       forEach$1: function(_, action) {
         var cell, modifications;
-        cell = this._collection$_first;
-        modifications = this._collection$_modifications;
+        cell = this._first;
+        modifications = this._modifications;
         for (; cell != null;) {
           action.call$1(cell.get$_collection$_element());
-          if (modifications !== this._collection$_modifications)
+          if (modifications !== this._modifications)
             throw H.wrapException(new P.ConcurrentModificationError(this));
-          cell = cell.get$_collection$_next();
+          cell = cell.get$_next();
         }
       },
       get$first: function(_) {
-        var t1 = this._collection$_first;
+        var t1 = this._first;
         if (t1 == null)
           throw H.wrapException(new P.StateError("No elements"));
         return t1.get$_collection$_element();
       },
       get$last: function(_) {
-        var t1 = this._collection$_last;
+        var t1 = this._last;
         if (t1 == null)
           throw H.wrapException(new P.StateError("No elements"));
         return t1._collection$_element;
@@ -6753,57 +7014,57 @@
       add$1: function(_, element) {
         var strings, table, nums;
         if (typeof element === "string" && element !== "__proto__") {
-          strings = this._collection$_strings;
+          strings = this._strings;
           if (strings == null) {
             table = Object.create(null);
             table["<non-identifier-key>"] = table;
             delete table["<non-identifier-key>"];
-            this._collection$_strings = table;
+            this._strings = table;
             strings = table;
           }
-          return this._collection$_addHashTableEntry$2(strings, element);
+          return this._addHashTableEntry$2(strings, element);
         } else if (typeof element === "number" && (element & 0x3ffffff) === element) {
-          nums = this._collection$_nums;
+          nums = this._nums;
           if (nums == null) {
             table = Object.create(null);
             table["<non-identifier-key>"] = table;
             delete table["<non-identifier-key>"];
-            this._collection$_nums = table;
+            this._nums = table;
             nums = table;
           }
-          return this._collection$_addHashTableEntry$2(nums, element);
+          return this._addHashTableEntry$2(nums, element);
         } else
           return this._add$1(element);
       },
       _add$1: function(element) {
         var rest, hash, bucket;
-        rest = this._collection$_rest;
+        rest = this._rest;
         if (rest == null) {
           rest = P._LinkedHashSet__newHashTable();
-          this._collection$_rest = rest;
+          this._rest = rest;
         }
         hash = this._computeHashCode$1(element);
         bucket = rest[hash];
         if (bucket == null)
-          rest[hash] = [this._collection$_newLinkedCell$1(element)];
+          rest[hash] = [this._newLinkedCell$1(element)];
         else {
           if (this._findBucketIndex$2(bucket, element) >= 0)
             return false;
-          bucket.push(this._collection$_newLinkedCell$1(element));
+          bucket.push(this._newLinkedCell$1(element));
         }
         return true;
       },
       remove$1: function(_, object) {
         if (typeof object === "string" && object !== "__proto__")
-          return this._removeHashTableEntry$2(this._collection$_strings, object);
+          return this._removeHashTableEntry$2(this._strings, object);
         else if (typeof object === "number" && (object & 0x3ffffff) === object)
-          return this._removeHashTableEntry$2(this._collection$_nums, object);
+          return this._removeHashTableEntry$2(this._nums, object);
         else
           return this._remove$1(object);
       },
       _remove$1: function(object) {
         var rest, bucket, index;
-        rest = this._collection$_rest;
+        rest = this._rest;
         if (rest == null)
           return false;
         bucket = rest[this._computeHashCode$1(object)];
@@ -6815,19 +7076,19 @@
       },
       clear$0: function(_) {
         if (this._collection$_length > 0) {
-          this._collection$_last = null;
-          this._collection$_first = null;
-          this._collection$_rest = null;
-          this._collection$_nums = null;
-          this._collection$_strings = null;
+          this._last = null;
+          this._first = null;
+          this._rest = null;
+          this._nums = null;
+          this._strings = null;
           this._collection$_length = 0;
-          this._collection$_modifications = this._collection$_modifications + 1 & 67108863;
+          this._modifications = this._modifications + 1 & 67108863;
         }
       },
-      _collection$_addHashTableEntry$2: function(table, element) {
+      _addHashTableEntry$2: function(table, element) {
         if (table[element] != null)
           return false;
-        table[element] = this._collection$_newLinkedCell$1(element);
+        table[element] = this._newLinkedCell$1(element);
         return true;
       },
       _removeHashTableEntry$2: function(table, element) {
@@ -6841,36 +7102,36 @@
         delete table[element];
         return true;
       },
-      _collection$_newLinkedCell$1: function(element) {
+      _newLinkedCell$1: function(element) {
         var cell, last;
         cell = new P.LinkedHashSetCell(element, null, null);
-        if (this._collection$_first == null) {
-          this._collection$_last = cell;
-          this._collection$_first = cell;
+        if (this._first == null) {
+          this._last = cell;
+          this._first = cell;
         } else {
-          last = this._collection$_last;
-          cell._collection$_previous = last;
-          last._collection$_next = cell;
-          this._collection$_last = cell;
+          last = this._last;
+          cell._previous = last;
+          last._next = cell;
+          this._last = cell;
         }
         ++this._collection$_length;
-        this._collection$_modifications = this._collection$_modifications + 1 & 67108863;
+        this._modifications = this._modifications + 1 & 67108863;
         return cell;
       },
       _unlinkCell$1: function(cell) {
         var previous, next;
-        previous = cell.get$_collection$_previous();
-        next = cell.get$_collection$_next();
+        previous = cell.get$_previous();
+        next = cell.get$_next();
         if (previous == null)
-          this._collection$_first = next;
+          this._first = next;
         else
-          previous._collection$_next = next;
+          previous._next = next;
         if (next == null)
-          this._collection$_last = previous;
+          this._last = previous;
         else
-          next.set$_collection$_previous(previous);
+          next.set$_previous(previous);
         --this._collection$_length;
-        this._collection$_modifications = this._collection$_modifications + 1 & 67108863;
+        this._modifications = this._modifications + 1 & 67108863;
       },
       _computeHashCode$1: function(element) {
         return J.get$hashCode$(element) & 0x3ffffff;
@@ -6896,16 +7157,16 @@
         }}
     },
     LinkedHashSetCell: {
-      "^": "Object;_collection$_element<,_collection$_next<,_collection$_previous@"
+      "^": "Object;_collection$_element<,_next<,_previous@"
     },
     LinkedHashSetIterator: {
-      "^": "Object;_set,_collection$_modifications,_cell,_collection$_current",
+      "^": "Object;_set,_modifications,_cell,_collection$_current",
       get$current: function() {
         return this._collection$_current;
       },
       moveNext$0: function() {
         var t1 = this._set;
-        if (this._collection$_modifications !== t1._collection$_modifications)
+        if (this._modifications !== t1._modifications)
           throw H.wrapException(new P.ConcurrentModificationError(t1));
         else {
           t1 = this._cell;
@@ -6914,7 +7175,7 @@
             return false;
           } else {
             this._collection$_current = t1.get$_collection$_element();
-            this._cell = this._cell.get$_collection$_next();
+            this._cell = this._cell.get$_next();
             return true;
           }
         }
@@ -7989,6 +8250,9 @@
         }
       return H.Primitives_stringFromCharCodes(list);
     },
+    Comparable_compare: [function(a, b) {
+      return J.compareTo$1$ns(a, b);
+    }, "call$2", "core_Comparable_compare$closure", 4, 0, 29],
     Error_safeToString: function(object) {
       if (typeof object === "number" || typeof object === "boolean" || null == object)
         return J.toString$0$(object);
@@ -8048,14 +8312,20 @@
       "^": "Object;"
     },
     "+bool": 0,
+    Comparable: {
+      "^": "Object;"
+    },
     DateTime: {
-      "^": "Object;millisecondsSinceEpoch,isUtc",
+      "^": "Object;millisecondsSinceEpoch<,isUtc",
       $eq: function(_, other) {
         if (other == null)
           return false;
         if (!(other instanceof P.DateTime))
           return false;
         return this.millisecondsSinceEpoch === other.millisecondsSinceEpoch && this.isUtc === other.isUtc;
+      },
+      compareTo$1: function(_, other) {
+        return C.JSNumber_methods.compareTo$1(this.millisecondsSinceEpoch, other.get$millisecondsSinceEpoch());
       },
       get$hashCode: function(_) {
         return this.millisecondsSinceEpoch;
@@ -8082,6 +8352,8 @@
         if (Math.abs(millisecondsSinceEpoch) > 864e13)
           throw H.wrapException(P.ArgumentError$(millisecondsSinceEpoch));
       },
+      $isComparable: 1,
+      $asComparable: Isolate.functionThatReturnsNull,
       static: {DateTime$fromMillisecondsSinceEpoch: function(millisecondsSinceEpoch, isUtc) {
           var t1 = new P.DateTime(millisecondsSinceEpoch, isUtc);
           t1.DateTime$fromMillisecondsSinceEpoch$2$isUtc(millisecondsSinceEpoch, isUtc);
@@ -8110,7 +8382,11 @@
         }}
     },
     $double: {
-      "^": "num;"
+      "^": "num;",
+      $isComparable: 1,
+      $asComparable: function() {
+        return [P.num];
+      }
     },
     "+double": 0,
     Duration: {
@@ -8148,6 +8424,9 @@
       get$hashCode: function(_) {
         return this._duration & 0x1FFFFFFF;
       },
+      compareTo$1: function(_, other) {
+        return C.JSInt_methods.compareTo$1(this._duration, other.get$_duration());
+      },
       toString$0: function(_) {
         var t1, t2, twoDigitMinutes, twoDigitSeconds, sixDigitUs;
         t1 = new P.Duration_toString_twoDigits();
@@ -8161,6 +8440,10 @@
       },
       $negate: function(_) {
         return new P.Duration(-this._duration);
+      },
+      $isComparable: 1,
+      $asComparable: function() {
+        return [P.Duration];
       },
       static: {Duration$: function(days, hours, microseconds, milliseconds, minutes, seconds) {
           return new P.Duration(864e8 * days + 3600000000 * hours + 60000000 * minutes + 1000000 * seconds + 1000 * milliseconds + microseconds);
@@ -8488,7 +8771,11 @@
       "^": "Object;"
     },
     $int: {
-      "^": "num;"
+      "^": "num;",
+      $isComparable: 1,
+      $asComparable: function() {
+        return [P.num];
+      }
     },
     "+int": 0,
     Iterable: {
@@ -8574,7 +8861,11 @@
     },
     "+Null": 0,
     num: {
-      "^": "Object;"
+      "^": "Object;",
+      $isComparable: 1,
+      $asComparable: function() {
+        return [P.num];
+      }
     },
     "+num": 0,
     Object: {
@@ -8599,7 +8890,11 @@
       "^": "Object;"
     },
     String: {
-      "^": "Object;"
+      "^": "Object;",
+      $isComparable: 1,
+      $asComparable: function() {
+        return [P.String];
+      }
     },
     "+String": 0,
     StringBuffer: {
@@ -9958,7 +10253,7 @@
       "^": "Interceptor;",
       $isEvent: 1,
       $isObject: 1,
-      "%": "AnimationPlayerEvent|ApplicationCacheErrorEvent|AudioProcessingEvent|AutocompleteErrorEvent|CustomEvent|DeviceLightEvent|DeviceMotionEvent|DeviceOrientationEvent|ExtendableEvent|FetchEvent|FontFaceSetLoadEvent|GamepadEvent|HashChangeEvent|IDBVersionChangeEvent|InstallEvent|MIDIConnectionEvent|MediaKeyEvent|MediaKeyMessageEvent|MediaKeyNeededEvent|MediaQueryListEvent|MediaStreamEvent|MediaStreamTrackEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|PopStateEvent|ProgressEvent|RTCDTMFToneChangeEvent|RTCDataChannelEvent|RTCIceCandidateEvent|RTCPeerConnectionIceEvent|RelatedEvent|ResourceProgressEvent|SecurityPolicyViolationEvent|SpeechRecognitionEvent|SpeechSynthesisEvent|StorageEvent|TrackEvent|TransitionEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|XMLHttpRequestProgressEvent;ClipboardEvent|Event|InputEvent"
+      "%": "AnimationPlayerEvent|ApplicationCacheErrorEvent|AudioProcessingEvent|AutocompleteErrorEvent|CustomEvent|DeviceLightEvent|DeviceMotionEvent|DeviceOrientationEvent|ExtendableEvent|FetchEvent|FontFaceSetLoadEvent|GamepadEvent|HashChangeEvent|IDBVersionChangeEvent|InstallEvent|MIDIConnectionEvent|MediaKeyEvent|MediaKeyMessageEvent|MediaKeyNeededEvent|MediaQueryListEvent|MediaStreamEvent|MediaStreamTrackEvent|MutationEvent|OfflineAudioCompletionEvent|OverflowEvent|PageTransitionEvent|ProgressEvent|RTCDTMFToneChangeEvent|RTCDataChannelEvent|RTCIceCandidateEvent|RTCPeerConnectionIceEvent|RelatedEvent|ResourceProgressEvent|SecurityPolicyViolationEvent|SpeechRecognitionEvent|SpeechSynthesisEvent|StorageEvent|TrackEvent|TransitionEvent|WebGLContextEvent|WebKitAnimationEvent|WebKitTransitionEvent|XMLHttpRequestProgressEvent;ClipboardEvent|Event|InputEvent"
     },
     EventTarget: {
       "^": "Interceptor;",
@@ -10259,6 +10554,17 @@
     ObjectElement: {
       "^": "HtmlElement;data=",
       "%": "HTMLObjectElement"
+    },
+    PopStateEvent: {
+      "^": "Event;",
+      get$state: function(receiver) {
+        var t1, t2;
+        t1 = receiver.state;
+        t2 = new P._AcceptStructuredCloneDart2Js([], [], false);
+        t2.mustCopy = true;
+        return t2.walk$1(t1);
+      },
+      "%": "PopStateEvent"
     },
     PushEvent: {
       "^": "Event;data=",
@@ -10568,7 +10874,20 @@
         list.remove(value);
         t1 = removed;
         return t1;
-      }
+      },
+      toggle$2: function(_, value, shouldAdd) {
+        return W._ElementCssClassSet__toggleOnOff(this._html$_element, value, shouldAdd);
+      },
+      static: {_ElementCssClassSet__toggleOnOff: function(_element, value, shouldAdd) {
+          var list = _element.classList;
+          if (shouldAdd) {
+            list.add(value);
+            return true;
+          } else {
+            list.remove(value);
+            return false;
+          }
+        }}
     },
     EventStreamProvider: {
       "^": "Object;_eventType",
@@ -11583,7 +11902,8 @@
         t2 = document.querySelector("#action").style;
         t2.display = "none";
         t1._setState$1(C.State_1);
-        t1._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "ready"]));
+        t1._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "ready", "player", J.$index$asx(t1.player.account, "id")]));
+        t1._checkGameStart$0();
       }, null, null, 0, 0, null, "call"]
     }
   }, 1], ["game", "Game.dart",, Q, {
@@ -11601,7 +11921,7 @@
       }
     },
     Game: {
-      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,state,timerSeconds,myGrid,piecesLeft,isAuthenticated",
+      "^": "Object;hydraClient,player,match,rtSessionAlias,grid,grids,opponents,state*,timerSeconds,myGrid,piecesLeft,turnOrder,turnIndex,isAuthenticated",
       _startTimer$1: function(seconds) {
         this.timerSeconds = seconds;
         document.querySelector("#timer").textContent = H.S(this.timerSeconds);
@@ -11662,15 +11982,81 @@
           return H.ioore(t1, x);
         J.set$className$x(t1[x], cls);
       },
-      _markPlayerOnline$1: function(opponentGrid) {
+      _markPlayerOnline$2: function(opponentGrid, playerId) {
         var t1, t2, t3;
         t1 = J.getInterceptor$x(opponentGrid);
         t2 = t1.get$parent(opponentGrid);
         t3 = J.getInterceptor$x(t2);
         t3.get$classes(t2).remove$1(0, "open");
         t3.get$classes(t2).add$1(0, "taken");
+        t2 = this.opponents;
+        if (!t2.containsKey$1(playerId))
+          t2.$indexSet(0, playerId, new X.FiveBomberOpponent(C.OpponentState_0));
         t1.get$classes(opponentGrid).remove$1(0, "offline");
         t1.get$classes(opponentGrid).add$1(0, "online");
+      },
+      _setOpponentState$2: function(playerId, state) {
+        var classes, enabled, t1, i;
+        J.set$state$x(this.opponents.$index(0, playerId), state);
+        classes = ["setup", "ready", "turn"];
+        enabled = [false, false, false];
+        switch (state) {
+          case C.OpponentState_0:
+            enabled[0] = true;
+            break;
+          case C.OpponentState_1:
+            enabled[1] = true;
+            break;
+          case C.OpponentState_2:
+            enabled[2] = true;
+            break;
+        }
+        for (t1 = this.grids, i = 0; i < 3; ++i)
+          J.get$classes$x(J.get$parent$x(t1.$index(0, playerId))).toggle$2(0, classes[i], enabled[i]);
+      },
+      _checkGameStart$0: function() {
+        var t1, opponentsReady, t2, op;
+        t1 = this.opponents;
+        opponentsReady = t1.get$length(t1) > 0;
+        for (t2 = t1.get$values(t1), t2 = t2.get$iterator(t2); t2.moveNext$0();) {
+          op = t2.get$current();
+          opponentsReady = opponentsReady && J.$eq$(J.get$state$x(op), C.OpponentState_1);
+        }
+        if (opponentsReady && this.state === C.State_1) {
+          this.turnIndex = -1;
+          for (t1 = t1.get$keys(), t1 = t1.get$iterator(t1), t2 = this.turnOrder; t1.moveNext$0();)
+            t2.push(t1.get$current());
+          t2.push(J.$index$asx(this.player.account, "id"));
+          C.JSArray_methods.sort$0(t2);
+          this.nextTurn$0();
+        }
+      },
+      nextTurn$0: function() {
+        var t1, t2, turn, t3;
+        this._setState$1(C.State_2);
+        t1 = this.turnIndex;
+        if (t1 >= 0) {
+          t2 = this.turnOrder;
+          if (t1 >= t2.length)
+            return H.ioore(t2, t1);
+          turn = t2[t1];
+          if (!J.$eq$(turn, J.$index$asx(this.player.account, "id")))
+            this._setOpponentState$2(turn, C.OpponentState_1);
+        }
+        t1 = ++this.turnIndex;
+        t2 = this.turnOrder;
+        t3 = t2.length;
+        if (t1 >= t3) {
+          this.turnIndex = 0;
+          t1 = 0;
+        }
+        if (t1 < 0 || t1 >= t3)
+          return H.ioore(t2, t1);
+        turn = t2[t1];
+        if (J.$eq$(turn, J.$index$asx(this.player.account, "id")))
+          this._setState$1(C.State_3);
+        else
+          this._setOpponentState$2(turn, C.OpponentState_2);
       },
       _renderGrid$4: function(holder, username, accountId, $self) {
         var $name, t1, grid, t2, y, row, x, cell, t3, t4, t5, t6;
@@ -11706,7 +12092,7 @@
         return grid;
       },
       _onMatchJoin$1: function(response) {
-        var t1, t2, playerHolder, currentPlayers, allPlayers, t3, playerId, t4, player, t5, opponentHolder, message;
+        var t1, t2, playerHolder, currentPlayers, allPlayers, t3, t4, playerId, t5, player, t6, opponentHolder, message;
         t1 = J.getInterceptor$asx(response);
         if (t1.$index(response, "hasError") !== true) {
           t2 = document.querySelector("#controls").style;
@@ -11723,19 +12109,21 @@
           t1.clear$0(0);
           currentPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "current");
           allPlayers = J.$index$asx(J.$index$asx(this.match, "players"), "all");
-          for (t2 = J.get$iterator$ax(currentPlayers), t3 = J.getInterceptor$ax(allPlayers); t2.moveNext$0();) {
+          for (t2 = J.get$iterator$ax(currentPlayers), t3 = J.getInterceptor$ax(allPlayers), t4 = this.opponents; t2.moveNext$0();) {
             playerId = t2.get$current();
             if (!J.$eq$(playerId, J.$index$asx(this.player.account, "id")))
-              for (t4 = t3.get$iterator(allPlayers); t4.moveNext$0();) {
-                player = t4.get$current();
-                t5 = J.getInterceptor$asx(player);
-                if (J.$eq$(t5.$index(player, "account_id"), playerId)) {
-                  t4 = "#opponent" + (t1.get$length(t1) + 1);
-                  opponentHolder = document.querySelector(t4);
-                  t4 = J.getInterceptor$x(opponentHolder);
-                  t4.get$classes(opponentHolder).remove$1(0, "open");
-                  t4.get$classes(opponentHolder).add$1(0, "taken");
-                  t1.$indexSet(0, playerId, this._renderGrid$4(opponentHolder, J.$index$asx(t5.$index(player, "identity"), "username"), t5.$index(player, "account_id"), false));
+              for (t5 = t3.get$iterator(allPlayers); t5.moveNext$0();) {
+                player = t5.get$current();
+                t6 = J.getInterceptor$asx(player);
+                if (J.$eq$(t6.$index(player, "account_id"), playerId)) {
+                  t5 = "#opponent" + (t1.get$length(t1) + 1);
+                  opponentHolder = document.querySelector(t5);
+                  t5 = J.getInterceptor$x(opponentHolder);
+                  t5.get$classes(opponentHolder).remove$1(0, "open");
+                  t5.get$classes(opponentHolder).add$1(0, "taken");
+                  if (!t4.containsKey$1(playerId))
+                    t4.$indexSet(0, playerId, new X.FiveBomberOpponent(C.OpponentState_0));
+                  t1.$indexSet(0, playerId, this._renderGrid$4(opponentHolder, J.$index$asx(t6.$index(player, "identity"), "username"), t6.$index(player, "account_id"), false));
                   J.set$className$x(t1.$index(0, playerId), "playergrid offline");
                   break;
                 }
@@ -11766,25 +12154,28 @@
         this.hydraClient.wsSend$1(message);
       },
       _onRtMessage$2: [function(cmd, payload) {
-        var t1, t2, player, t3, t4, t5, t6, opponentHolder, data, playerId, pos, x, y;
+        var t1, t2, t3, player, t4, t5, t6, t7, t8, opponentHolder, data, playerId, pos, x, y;
         P.print(payload);
         t1 = J.getInterceptor(cmd);
         if (t1.$eq(cmd, "join")) {
           t1 = J.getInterceptor$asx(payload);
           if (t1.$index(payload, "success") === true) {
             this.rtSessionAlias = t1.$index(payload, "sessionAlias");
-            for (t1 = J.get$iterator$ax(J.$index$asx(t1.$index(payload, "data"), "players")), t2 = this.grids; t1.moveNext$0();) {
+            for (t1 = J.get$iterator$ax(J.$index$asx(t1.$index(payload, "data"), "players")), t2 = this.grids, t3 = this.opponents; t1.moveNext$0();) {
               player = t1.get$current();
-              t3 = J.getInterceptor$asx(player);
-              if (!J.$eq$(t3.$index(player, "id"), J.$index$asx(this.player.account, "id")) && t2.$index(0, t3.$index(player, "id")) != null) {
-                t3 = t2.$index(0, t3.$index(player, "id"));
-                t4 = J.getInterceptor$x(t3);
-                t5 = t4.get$parent(t3);
+              t4 = J.getInterceptor$asx(player);
+              if (!J.$eq$(t4.$index(player, "id"), J.$index$asx(this.player.account, "id")) && t2.$index(0, t4.$index(player, "id")) != null) {
+                t5 = t2.$index(0, t4.$index(player, "id"));
+                t4 = t4.$index(player, "id");
                 t6 = J.getInterceptor$x(t5);
-                t6.get$classes(t5).remove$1(0, "open");
-                t6.get$classes(t5).add$1(0, "taken");
-                t4.get$classes(t3).remove$1(0, "offline");
-                t4.get$classes(t3).add$1(0, "online");
+                t7 = t6.get$parent(t5);
+                t8 = J.getInterceptor$x(t7);
+                t8.get$classes(t7).remove$1(0, "open");
+                t8.get$classes(t7).add$1(0, "taken");
+                if (!t3.containsKey$1(t4))
+                  t3.$indexSet(0, t4, new X.FiveBomberOpponent(C.OpponentState_0));
+                t6.get$classes(t5).remove$1(0, "offline");
+                t6.get$classes(t5).add$1(0, "online");
               }
             }
           }
@@ -11798,7 +12189,7 @@
               opponentHolder = document.querySelector(t3);
               t2.$indexSet(0, t1.$index(payload, "player"), this._renderGrid$4(opponentHolder, J.$index$asx(J.$index$asx(t1.$index(payload, "data"), "identity"), "username"), t1.$index(payload, "player"), false));
             }
-            this._markPlayerOnline$1(t2.$index(0, player));
+            this._markPlayerOnline$2(t2.$index(0, player), player);
           }
         } else if (t1.$eq(cmd, "send-simulation")) {
           if (J.$eq$(J.$index$asx(payload, "alias"), this.rtSessionAlias))
@@ -11834,6 +12225,7 @@
                   J.set$className$x(t1[x], "miss");
                 }
               }
+              this.nextTurn$0();
             } else if (J.$eq$(t1.$index(data, "type"), "shot-hit")) {
               playerId = t1.$index(data, "player");
               pos = t1.$index(data, "pos");
@@ -11846,6 +12238,12 @@
                 if (x >>> 0 !== x || x >= t1.length)
                   return H.ioore(t1, x);
                 J.set$className$x(t1[x], "hit");
+              }
+            } else if (J.$eq$(t1.$index(data, "type"), "ready")) {
+              playerId = t1.$index(data, "player");
+              if (!J.$eq$(playerId, J.$index$asx(this.player.account, "id"))) {
+                this._setOpponentState$2(playerId, C.OpponentState_1);
+                this._checkGameStart$0();
               }
             }
           }
@@ -11888,10 +12286,12 @@
           this.hydraLogin$2(authToken, new Q.Game_closure());
       },
       static: {Game$: function(client) {
-          var t1 = H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]);
-          t1 = new Q.Game(null, null, null, null, null, t1, C.State_0, null, [], 4, false);
-          t1.Game$1(client);
-          return t1;
+          var t1, t2;
+          t1 = H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]);
+          t2 = H.setRuntimeTypeInfo(new H.JsLinkedHashMap(0, null, null, null, null, null, 0), [null, null]);
+          t2 = new Q.Game(null, null, null, null, null, t1, t2, C.State_0, null, [], 4, [], -1, false);
+          t2.Game$1(client);
+          return t2;
         }}
     },
     Game_closure: {
@@ -11922,9 +12322,11 @@
       "^": "Closure:1;_game$_captured_this_0,_captured_accountId_1,_captured_self_2,_captured_y_3,_captured_x_4",
       call$1: [function(e) {
         var t1, t2, t3, t4;
-        if (!this._captured_self_2)
-          this._game$_captured_this_0._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_4, "y", this._captured_y_3]), "player", this._captured_accountId_1]));
-        else {
+        if (!this._captured_self_2) {
+          t1 = this._game$_captured_this_0;
+          if (t1.state === C.State_3)
+            t1._sendAllGameMessage$1(P.LinkedHashMap__makeLiteral(["type", "shot-fired", "pos", P.LinkedHashMap__makeLiteral(["x", this._captured_x_4, "y", this._captured_y_3]), "player", this._captured_accountId_1]));
+        } else {
           t1 = this._game$_captured_this_0;
           if (t1.state === C.State_0) {
             t2 = this._captured_x_4;
@@ -12188,11 +12590,25 @@
       toString$0: function(_) {
         return this.readClasses$0().join$1(0, " ");
       },
+      toggle$2: function(_, value, shouldAdd) {
+        var s, result;
+        this._validateToken$1(value);
+        s = this.readClasses$0();
+        if (shouldAdd) {
+          s.add$1(0, value);
+          result = true;
+        } else {
+          s.remove$1(0, value);
+          result = false;
+        }
+        this.writeClasses$1(s);
+        return result;
+      },
       get$iterator: function(_) {
         var t1, t2;
         t1 = this.readClasses$0();
-        t2 = new P.LinkedHashSetIterator(t1, t1._collection$_modifications, null, null);
-        t2._cell = t1._collection$_first;
+        t2 = new P.LinkedHashSetIterator(t1, t1._modifications, null, null);
+        t2._cell = t1._first;
         return t2;
       },
       forEach$1: function(_, f) {
@@ -12384,7 +12800,7 @@
       }
     },
     Hydra_startupWithOptions_closure: {
-      "^": "Closure:3;_captured_this_0,_captured_callback_1",
+      "^": "Closure:3;_hydra$_captured_this_0,_hydra$_captured_callback_1",
       call$1: function(response) {
         var t1, account, clusters, servers;
         t1 = J.getInterceptor$asx(response);
@@ -12392,19 +12808,19 @@
           if (J.$index$asx(t1.$index(response, "data"), "configuration") != null) {
             account = J.$index$asx(t1.$index(response, "data"), "account");
             clusters = J.$index$asx(C.JsonCodec_null_null.decode$1(J.$index$asx($.$get$context(), "JSON").callMethod$2("stringify", [J.$index$asx(J.$index$asx(t1.$index(response, "data"), "configuration"), "realtime")])), "servers");
-            t1 = this._captured_this_0;
+            t1 = this._hydra$_captured_this_0;
             t1.rtCluster = J.get$first$ax(clusters.get$keys());
             servers = J.$index$asx(clusters, J.get$first$ax(clusters.get$keys()));
             t1._realtimeConnect$2(J.$index$asx(J.$index$asx(servers, J.get$first$ax(servers.get$keys())), "ws"), J.$index$asx(account, "id"));
           } else
             P.print("Not connecting to realtime: missing configuration");
-        this._captured_callback_1.call$1(response);
+        this._hydra$_captured_callback_1.call$1(response);
       }
     },
     Hydra__getJSCallback_closure: {
-      "^": "Closure:27;_captured_callback_0",
+      "^": "Closure:27;_hydra$_captured_callback_0",
       call$2: [function(client, response) {
-        this._captured_callback_0.call$1(response);
+        this._hydra$_captured_callback_0.call$1(response);
       }, null, null, 4, 0, null, 31, 32, "call"]
     },
     Hydra__realtimeConnect_scheduleReconnect: {
@@ -12467,10 +12883,21 @@
       }, null, null, 2, 0, null, 0, "call"]
     },
     Hydra__wsPing_closure: {
-      "^": "Closure:0;_captured_this_0",
+      "^": "Closure:0;_hydra$_captured_this_0",
       call$0: function() {
-        return this._captured_this_0._wsPing$0();
+        return this._hydra$_captured_this_0._wsPing$0();
       }
+    }
+  }], ["oponent", "Opponent.dart",, X, {
+    "^": "",
+    OpponentState: {
+      "^": "Object;index",
+      toString$0: function(_) {
+        return C.Map_sgebu.$index(0, this.index);
+      }
+    },
+    FiveBomberOpponent: {
+      "^": "Object;state*"
     }
   }], ["player", "Player.dart",, G, {
     "^": "",
@@ -12583,6 +13010,9 @@
   J.set$returnValue$x = function(receiver, value) {
     return J.getInterceptor$x(receiver).set$returnValue(receiver, value);
   };
+  J.set$state$x = function(receiver, value) {
+    return J.getInterceptor$x(receiver).set$state(receiver, value);
+  };
   J.set$text$x = function(receiver, value) {
     return J.getInterceptor$x(receiver).set$text(receiver, value);
   };
@@ -12616,11 +13046,17 @@
   J.get$length$asx = function(receiver) {
     return J.getInterceptor$asx(receiver).get$length(receiver);
   };
+  J.get$parent$x = function(receiver) {
+    return J.getInterceptor$x(receiver).get$parent(receiver);
+  };
   J.get$result$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$result(receiver);
   };
   J.get$rows$x = function(receiver) {
     return J.getInterceptor$x(receiver).get$rows(receiver);
+  };
+  J.get$state$x = function(receiver) {
+    return J.getInterceptor$x(receiver).get$state(receiver);
   };
   J.$add$ns = function(receiver, a0) {
     if (typeof receiver == "number" && typeof a0 == "number")
@@ -12693,6 +13129,9 @@
   };
   J.codeUnitAt$1$s = function(receiver, a0) {
     return J.getInterceptor$s(receiver).codeUnitAt$1(receiver, a0);
+  };
+  J.compareTo$1$ns = function(receiver, a0) {
+    return J.getInterceptor$ns(receiver).compareTo$1(receiver, a0);
   };
   J.elementAt$1$ax = function(receiver, a0) {
     return J.getInterceptor$ax(receiver).elementAt$1(receiver, a0);
@@ -12920,7 +13359,11 @@
   C.List_empty0 = H.setRuntimeTypeInfo(Isolate.makeConstantList([]), [P.Symbol]);
   C.Map_empty = H.setRuntimeTypeInfo(new H.ConstantStringMap(0, {}, C.List_empty0), [P.Symbol, null]);
   C.Map_sgKYl = new H.GeneralConstantMap([0, "SpotState.Blank", 1, "SpotState.Piece", 2, "SpotState.Hit"]);
+  C.Map_sgebu = new H.GeneralConstantMap([0, "OpponentState.Setup", 1, "OpponentState.Ready", 2, "OpponentState.Turn"]);
   C.Map_yT1Od = new H.GeneralConstantMap([0, "State.Setup", 1, "State.Ready", 2, "State.Waiting", 3, "State.Turn", 4, "State.Finished"]);
+  C.OpponentState_0 = new X.OpponentState(0);
+  C.OpponentState_1 = new X.OpponentState(1);
+  C.OpponentState_2 = new X.OpponentState(2);
   C.SpotState_0 = new Q.SpotState(0);
   C.SpotState_1 = new Q.SpotState(1);
   C.SpotState_2 = new Q.SpotState(2);
@@ -13046,7 +13489,7 @@
   Isolate = Isolate.$finishIsolateConstructor(Isolate);
   $ = new Isolate();
   init.metadata = ["e", "error", "stackTrace", "value", null, "_", "o", "object", "x", "data", "key", "result", "sender", "closure", "isolate", "numberOfArguments", "arg1", "arg2", "arg3", "arg4", "each", "ignored", "element", "arg", "byteString", "event", "callback", "captureThis", "self", "arguments", "auth", "client", "response"];
-  init.types = [{func: 1}, {func: 1, args: [,]}, {func: 1, v: true}, {func: 1, args: [P.JsObject]}, {func: 1, args: [,,]}, {func: 1, v: true, args: [{func: 1, v: true}]}, {func: 1, v: true, args: [,], opt: [P.StackTrace]}, {func: 1, args: [,], opt: [,]}, {func: 1, ret: P.String, args: [P.$int]}, {func: 1, ret: P.Object, args: [,]}, {func: 1, args: [P.String,,]}, {func: 1, args: [, P.String]}, {func: 1, args: [P.String]}, {func: 1, args: [{func: 1, v: true}]}, {func: 1, ret: P.bool}, {func: 1, args: [, P.StackTrace]}, {func: 1, v: true, args: [, P.StackTrace]}, {func: 1, ret: P.$int, args: [, P.$int]}, {func: 1, v: true, args: [P.$int, P.$int]}, {func: 1, args: [P.Symbol,,]}, {func: 1, ret: P.$int, args: [,,]}, {func: 1, v: true, args: [P.String]}, {func: 1, v: true, args: [P.String], opt: [,]}, {func: 1, ret: P.$int, args: [P.$int, P.$int]}, {func: 1, args: [W.BeforeUnloadEvent]}, {func: 1, v: true, args: [P.String, P.Map]}, {func: 1, args: [P.Timer]}, {func: 1, args: [, P.JsObject]}, {func: 1, args: [W.MessageEvent]}];
+  init.types = [{func: 1}, {func: 1, args: [,]}, {func: 1, v: true}, {func: 1, args: [P.JsObject]}, {func: 1, args: [,,]}, {func: 1, v: true, args: [{func: 1, v: true}]}, {func: 1, v: true, args: [,], opt: [P.StackTrace]}, {func: 1, args: [,], opt: [,]}, {func: 1, ret: P.String, args: [P.$int]}, {func: 1, ret: P.Object, args: [,]}, {func: 1, args: [P.String,,]}, {func: 1, args: [, P.String]}, {func: 1, args: [P.String]}, {func: 1, args: [{func: 1, v: true}]}, {func: 1, ret: P.bool}, {func: 1, args: [, P.StackTrace]}, {func: 1, v: true, args: [, P.StackTrace]}, {func: 1, ret: P.$int, args: [, P.$int]}, {func: 1, v: true, args: [P.$int, P.$int]}, {func: 1, args: [P.Symbol,,]}, {func: 1, ret: P.$int, args: [,,]}, {func: 1, v: true, args: [P.String]}, {func: 1, v: true, args: [P.String], opt: [,]}, {func: 1, ret: P.$int, args: [P.$int, P.$int]}, {func: 1, args: [W.BeforeUnloadEvent]}, {func: 1, v: true, args: [P.String, P.Map]}, {func: 1, args: [P.Timer]}, {func: 1, args: [, P.JsObject]}, {func: 1, args: [W.MessageEvent]}, {func: 1, ret: P.$int, args: [P.Comparable, P.Comparable]}];
   function convertToFastObject(properties) {
     function MyClass() {
     }
