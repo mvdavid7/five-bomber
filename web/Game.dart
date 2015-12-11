@@ -514,9 +514,11 @@ class Game {
           this._checkGameStart();
         } else if(data['type'] == 'player-dead') {
           String playerId = data['player'];
-          this.turnOrder.remove(playerId);
+          this._removeFromTurnOrder(playerId);
           if(playerId != this.player.account['id']) {
             this._setOpponentState(playerId, OpponentState.Dead);
+          } else {
+            this.onLose();
           }
           this._checkGameEnd();
         }
