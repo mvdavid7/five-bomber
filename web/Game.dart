@@ -8,6 +8,7 @@ import 'dart:js';
 import 'dart:convert';
 import 'Hydra.dart';
 import 'Player.dart';
+import 'Opponent.dart';
 
 enum State { Setup, Ready, Waiting, Turn, Finished}
 enum SpotState { Blank, Piece, Hit }
@@ -19,11 +20,15 @@ class Game {
   int rtSessionAlias;
   TableElement grid = null;
   Map<String, TableElement> grids = new Map();
+  Map<String, FiveBomberOpponent> opponents = new Map();
   State state = State.Setup;
   int timerSeconds;
 
   List<List<SpotState>> myGrid = new List();
   int piecesLeft = 4;
+
+  List<String> turnOrder = new List();
+  int turnIndex = -1;
 
   Game(Hydra client) {
     this.hydraClient = client;
@@ -113,15 +118,57 @@ class Game {
     return this.myGrid[y][x];
   }
 
-  void _markPlayerInMatch(Element opponentHolder) {
+  void _markPlayerInMatch(Element opponentHolder, String playerId) {
     opponentHolder.classes.remove('open');
     opponentHolder.classes.add('taken');
+
+    if(!this.opponents.containsKey(playerId)) {
+      this.opponents[playerId] = new FiveBomberOpponent();
+    }
   }
 
-  void _markPlayerOnline(Element opponentGrid) {
-    _markPlayerInMatch(opponentGrid.parent);
+  void _markPlayerOnline(Element opponentGrid, String playerId) {
+    _markPlayerInMatch(opponentGrid.parent, playerId);
     opponentGrid.classes.remove('offline');
     opponentGrid.classes.add('online');
+  }
+
+  void _setOpponentState(String playerId, OpponentState state) {
+    this.opponents[playerId].state = state;
+
+    List<String> classes = ['setup', 'ready', 'turn'];
+    List<bool> enabled = [false, false, false];
+    switch(state) {
+      case OpponentState.Setup:
+        enabled[0] = true;
+        break;
+      case OpponentState.Ready:
+        enabled[1] = true;
+        break;
+      case OpponentState.Turn:
+        enabled[2] = true;
+        break;
+    }
+    for(int i = 0; i < classes.length; i++)
+      this.grids[playerId].parent.classes.toggle(classes[i], enabled[i]);
+  }
+
+  void _checkGameStart() {
+    bool opponentsReady = this.opponents.length > 0;
+    for(FiveBomberOpponent op in this.opponents.values) {
+      opponentsReady = opponentsReady && op.state == OpponentState.Ready;
+    }
+
+    if(opponentsReady && this.state == State.Ready) {
+      this.turnIndex = -1;
+      for(String playerId in this.opponents.keys) {
+        this.turnOrder.add(playerId);
+      }
+      this.turnOrder.add(this.player.account['id']);
+      this.turnOrder.sort();
+
+      this.nextTurn();
+    }
   }
 
   void onSetup() {
@@ -133,8 +180,37 @@ class Game {
     querySelector('#action').style.display = 'none';
     this._setState(State.Ready);
     this._sendAllGameMessage({
-      'type': 'ready'
+      'type': 'ready',
+      'player': player.account['id']
     });
+    this._checkGameStart();
+  }
+
+  void nextTurn() {
+    this._setState(State.Waiting);
+    String turn;
+
+    if(this.turnIndex >= 0) {
+      turn = this.turnOrder[this.turnIndex];
+      if(turn != this.player.account['id']) {
+        this._setOpponentState(turn, OpponentState.Ready);
+      }
+    }
+
+    this.turnIndex++;
+    if(this.turnIndex >= this.turnOrder.length)
+      this.turnIndex = 0;
+
+    turn = this.turnOrder[this.turnIndex];
+    if(turn == this.player.account['id']) {
+      this.onTurn();
+    } else {
+      this._setOpponentState(turn, OpponentState.Turn);
+    }
+  }
+
+  void onTurn() {
+    this._setState(State.Turn);
   }
 
   TableElement _renderGrid(Element holder, String username, String accountId, bool self) {
@@ -157,11 +233,13 @@ class Game {
         cell.className = 'empty';
         cell.onClick.listen((e) {
           if(!self) {
-            this._sendAllGameMessage({
-              'type': 'shot-fired',
-              'pos': {'x': x, 'y': y},
-              'player': accountId
-            });
+            if(this.state == State.Turn) {
+              this._sendAllGameMessage({
+                'type': 'shot-fired',
+                'pos': {'x': x, 'y': y},
+                'player': accountId
+              });
+            }
           } else if(this.state == State.Setup) {
             if(_getSpotState(x, y) == SpotState.Blank) {
               if(this.piecesLeft > 0) {
@@ -204,7 +282,7 @@ class Game {
           for(Map player in allPlayers) {
             if(player['account_id'] == playerId) {
               Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
-              _markPlayerInMatch(opponentHolder);
+              _markPlayerInMatch(opponentHolder, playerId);
               this.grids[playerId] = _renderGrid(opponentHolder, player['identity']['username'], player['account_id'], false);
               this.grids[playerId].className = 'playergrid offline';
               break;
@@ -290,7 +368,7 @@ class Game {
         List players = payload['data']['players'];
         for(Map player in players) {
           if(player['id'] != this.player.account['id'] && this.grids[player['id']] != null)
-            _markPlayerOnline(this.grids[player['id']]);
+            _markPlayerOnline(this.grids[player['id']], player['id']);
         }
       }
     } else if(cmd == 'player-joined') {
@@ -300,7 +378,7 @@ class Game {
           Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
           this.grids[payload['player']] = _renderGrid(opponentHolder, payload['data']['identity']['username'], payload['player'], false);
         }
-        _markPlayerOnline(this.grids[player]);
+        _markPlayerOnline(this.grids[player], player);
       }
     } else if(cmd == 'send-simulation') {
       if(payload['alias'] == this.rtSessionAlias) {
@@ -326,6 +404,7 @@ class Game {
           } else if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'miss';
           }
+          this.nextTurn();
         } else if(data['type'] == 'shot-hit') {
           String playerId = data['player'];
           Map pos = data['pos'];
@@ -333,6 +412,12 @@ class Game {
           int y = pos['y'];
           if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'hit';
+          }
+        }  else if(data['type'] == 'ready') {
+          String playerId = data['player'];
+          if(playerId != this.player.account['id']) {
+            this._setOpponentState(playerId, OpponentState.Ready);
+            this._checkGameStart();
           }
         }
       }
