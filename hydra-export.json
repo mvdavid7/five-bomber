@@ -1,0 +1,208 @@
+{
+  "profile": {
+    "search_fields": []
+  },
+  "profile_notifications": {
+    "templates": null
+  },
+  "gcm": {
+    "api_key": null,
+    "enabled": null,
+    "project_number": null
+  },
+  "twitter": {
+    "consumer_secret": null,
+    "consumer_key": null
+  },
+  "account_chat": {
+    "delivery_types": null,
+    "persistent": null,
+    "format": null
+  },
+  "export": {
+    "aws_secret_key": null,
+    "aws_access_key": null,
+    "aws_s3_bucket": null
+  },
+  "profile_leaderboards": [],
+  "ps4": {
+    "env": null
+  },
+  "server_side_code": {
+    "deploy_info": null,
+    "enabled": null,
+    "request_headers": null,
+    "ssc_type": null,
+    "deploy_args": null,
+    "deploy_type": null
+  },
+  "profile_calculations": [],
+  "profile_search_queries": [],
+  "xb1": {
+    "user_id_claim_type": null
+  },
+  "profile_feed_types": [],
+  "user_content_item_types": [],
+  "achievements": [],
+  "profile_event_channel_types": [],
+  "profile_data_attachments": [],
+  "clan_types": [],
+  "aggregates": [],
+  "interval_types": [],
+  "match_types": [
+    {
+      "name": "5-way",
+      "warnings": [],
+      "deletion_options": {
+        "criteria": 3600,
+        "basis": "time"
+      },
+      "min_players": 3,
+      "rank": "none",
+      "events": {
+        "standard": [
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_player_kick_player",
+            "template": "You've been kicked.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_match_end",
+            "template": "The match has concluded.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_player_leave",
+            "template": "{_player_} has left.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_invitation",
+            "template": "You've been invited to a match by {_player_}!",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_player_join",
+            "template": "{_player_} has joined.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_match_draw",
+            "template": "You've tied.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_player_kick_match",
+            "template": "{_player_} has been kicked.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_match_loss",
+            "template": "You've lost.",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_match_win",
+            "template": "You've won!",
+            "persistent": true
+          },
+          {
+            "delivery_types": [
+              "realtime"
+            ],
+            "name": "msg_update",
+            "template": "",
+            "persistent": false
+          }
+        ],
+        "custom": []
+      },
+      "rank_options": {
+        "url": "",
+        "default_rank": ""
+      },
+      "expiry_options": {
+        "criteria": 3600,
+        "basis": "time"
+      },
+      "max_players": 5,
+      "nested": {},
+      "data": {},
+      "slug": "5-way",
+      "leave_on_offline": true
+    }
+  ],
+  "lobby_types": [],
+  "broadcast_channels": [],
+  "custom_auth": {
+    "response_field_username": null,
+    "request_param": null,
+    "enabled": null,
+    "response_field_email": null,
+    "request_headers": null,
+    "request_method": null,
+    "request_endpoint": null,
+    "response_field_avatar": null,
+    "response_field_id": null
+  },
+  "profile_schema_fields": [],
+  "apns": {
+    "environment": null,
+    "sha1": null,
+    "enabled": null
+  },
+  "profile_matching": [],
+  "steam": {
+    "private_key": null,
+    "enabled": null
+  },
+  "matchmaking": [
+    {
+      "name": "5-way",
+      "nested": {},
+      "bottomout_time": 60,
+      "timeout": 60,
+      "criteria": {
+        "rules": {
+          "args": [],
+          "command": "and"
+        },
+        "compare": []
+      },
+      "threshold": {
+        "start": 1.0,
+        "end": 0.0
+      },
+      "data": {},
+      "slug": "5-way",
+      "template": "5-way"
+    }
+  ]
+}
