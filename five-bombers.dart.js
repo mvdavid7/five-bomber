@@ -12357,10 +12357,12 @@
               this._checkGameStart$0();
             } else if (J.$eq$(t1.$index(data, "type"), "player-dead")) {
               playerId = t1.$index(data, "player");
-              t1 = this.turnOrder;
-              C.JSArray_methods.remove$1(t1, playerId);
+              this._removeFromTurnOrder$1(playerId);
               if (!J.$eq$(playerId, J.$index$asx(this.player.account, "id")))
                 this._setOpponentState$2(playerId, C.OpponentState_3);
+              else
+                this._setState$1(C.State_5);
+              t1 = this.turnOrder;
               t2 = t1.length;
               if (t2 === 1) {
                 if (0 >= t2)
