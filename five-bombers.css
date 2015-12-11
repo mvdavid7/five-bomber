@@ -27,7 +27,7 @@ h1 {
 #opponents .open { background-color: #F0F0F0; }
 #opponents .ready { background-color: lightblue; }
 #opponents .turn { background-color: lightyellow; }
-#opponents .dead { background-color: lightred; }
+#opponents .dead { background-color: gray; }
 
 #player .blank { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 

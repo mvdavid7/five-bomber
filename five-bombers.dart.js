@@ -12122,7 +12122,8 @@
       },
       nextTurn$0: function() {
         var turn, t1, t2, t3;
-        this._setState$1(C.State_2);
+        if (this.state !== C.State_5)
+          this._setState$1(C.State_2);
         turn = this._getCurrentTurn$0();
         if (turn != null && !J.$eq$(turn, J.$index$asx(this.player.account, "id")))
           this._setOpponentState$2(turn, C.OpponentState_1);
