@@ -136,9 +136,8 @@ class Game {
 
     if(this.grids.containsKey(playerId)) {
       Element opHolder = this.grids[playerId].parent;
+      opHolder.className = 'playerspot open';
       opHolder.children.clear();
-      opHolder.classes.remove('taken');
-      opHolder.classes.add('open');
       this.grids.remove(playerId);
     }
 
@@ -151,6 +150,13 @@ class Game {
     _markPlayerInMatch(opponentGrid.parent, playerId);
     opponentGrid.classes.remove('offline');
     opponentGrid.classes.add('online');
+  }
+
+  void _markPlayerOffline(String playerId) {
+    if(this.grids.containsKey(playerId)) {
+      this.grids[playerId].classes.remove('online');
+      this.grids[playerId].classes.add('offline');
+    }
   }
 
   void _removeFromTurnOrder(String playerId) {
@@ -260,6 +266,13 @@ class Game {
 
   void onWin() {
     this._setState(State.Won);
+    Map body = {
+      'win': [this.player.account['id']],
+      'loss': this.opponents.keys
+    };
+
+    hydraClient.put('matches/${match['id']}/complete', body, (JsObject response) {
+    });
   }
 
   void onLose() {
@@ -326,6 +339,10 @@ class Game {
       this.grid = _renderGrid(playerHolder, player.username, player.account['id'], true);
       this.grid.className = 'playergrid online';
 
+      for(TableElement opGrid in this.grids.values) {
+        opGrid.parent.className = 'playerspot open';
+        opGrid.parent.children.clear();
+      }
       this.grids.clear();
 
       List<String> currentPlayers = this.match['players']['current'];
@@ -337,7 +354,7 @@ class Game {
               Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
               _markPlayerInMatch(opponentHolder, playerId);
               this.grids[playerId] = _renderGrid(opponentHolder, player['identity']['username'], player['account_id'], false);
-              this.grids[playerId].className = 'playergrid offline';
+              _markPlayerOffline(playerId);
               break;
             }
           }
@@ -442,6 +459,11 @@ class Game {
       if(payload['alias'] == this.rtSessionAlias) {
         String player = payload['player'];
         _markPlayerLeftMatch(player);
+      }
+    } else if(cmd == 'player-disconnected') {
+      if(payload['alias'] == this.rtSessionAlias) {
+        String player = payload['player'];
+        _markPlayerOffline(player);
       }
     } else if(cmd == 'send-simulation') {
       if(payload['alias'] == this.rtSessionAlias) {
