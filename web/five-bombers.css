@@ -38,8 +38,12 @@ h1 {
 .playergrid td { padding: 0px; margin: 0px; border: 1px solid black; width: 38px; height: 38px; }
 .clickable { cursor: pointer; }
 .online { border: 1px solid black; }
-.online.opponent td { cursor: pointer; }
+
+#self .setup td { cursor: pointer; }
+
 .offline td { border: 1px solid red; }
+
+.piece { background-color: blue; }
 .hit { background-color: red; }
 
 .footer { clear: both; font-size: 11px; text-align: center; padding-top: 50px; }

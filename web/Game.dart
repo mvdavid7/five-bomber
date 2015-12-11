@@ -10,6 +10,7 @@ import 'Hydra.dart';
 import 'Player.dart';
 
 enum State { Setup, Ready, Waiting, Turn, Finished}
+enum SpotState { Blank, Piece, Hit }
 
 class Game {
   Hydra hydraClient;
@@ -21,8 +22,18 @@ class Game {
   State state = State.Setup;
   int timerSeconds;
 
+  List<List<SpotState>> myGrid = new List();
+  int piecesLeft = 4;
+
   Game(Hydra client) {
     this.hydraClient = client;
+    for(int i = 0; i < 4; i++) {
+      List<SpotState> row = new List();
+      for(int j = 0; j < 4; j++) {
+        row.add(SpotState.Blank);
+      }
+      this.myGrid.add(row);
+    }
 
     String authToken = getSavedAuthToken();
     if(authToken != null) {
@@ -72,7 +83,34 @@ class Game {
         instr = 'Done';
         break;
     }
+
+    if(state == State.Setup)
+      querySelector('#self .playergrid').classes.add('setup');
+    else
+      querySelector('#self .playergrid').classes.remove('setup');
+
     querySelector('#instructions').text = instr;
+  }
+
+  void _setSpotState(int x, int y, SpotState state) {
+    String cls;
+    this.myGrid[y][x] = state;
+    switch(state) {
+      case SpotState.Blank:
+        cls = 'empty';
+        break;
+      case SpotState.Piece:
+        cls = 'piece';
+        break;
+      case SpotState.Hit:
+        cls = 'hit';
+        break;
+    }
+    this.grid.rows[y].cells[x].className = cls;
+  }
+
+  SpotState _getSpotState(int x, int y) {
+    return this.myGrid[y][x];
   }
 
   void onSetup() {
@@ -105,16 +143,27 @@ class Game {
       TableRowElement row = grid.insertRow(-1);
       for(int x = 0; x < 4; x++) {
         TableCellElement cell = row.addCell();
-        cell.className = 'empty' + (self ? ' opponent' : '');
-        if(!self) {
-          cell.onClick.listen((e) {
+        cell.className = 'empty';
+        cell.onClick.listen((e) {
+          if(!self) {
             this._sendAllGameMessage({
               'type': 'shot-fired',
               'pos': {'x': x, 'y': y},
               'player': accountId
             });
-          });
-        }
+          } else if(this.state == State.Setup) {
+            if(_getSpotState(x, y) == SpotState.Blank) {
+              if(this.piecesLeft > 0) {
+                this._setSpotState(x, y, SpotState.Piece);
+                this.piecesLeft--;
+              }
+            }
+            else if(_getSpotState(x, y) == SpotState.Piece) {
+              this._setSpotState(x, y, SpotState.Blank);
+              this.piecesLeft++;
+            }
+          }
+        });
       }
     }
 
@@ -123,8 +172,6 @@ class Game {
 
   void _onMatchJoin(JsObject response) {
     if (!response['hasError']) {
-      this.onSetup();
-
       querySelector('#controls').style.display = 'inherit';
       this.match = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
 
@@ -137,7 +184,6 @@ class Game {
       this.grid = _renderGrid(playerHolder, player.username, player.account['id'], true);
       this.grid.className = 'playergrid online';
 
-      Element opponentsRow = querySelector('#opponents');
       this.grids.clear();
 
       List<String> currentPlayers = this.match['players']['current'];
@@ -165,6 +211,8 @@ class Game {
         }
       };
       hydraClient.wsSend(message);
+
+      this.onSetup();
     }
   }
 
@@ -258,7 +306,9 @@ class Game {
           int x = pos['x'];
           int y = pos['y'];
           if(playerId == this.player.account['id']) {
-            this.grid.rows[y].cells[x].className = 'hit';
+            if(this._getSpotState(x, y) == SpotState.Piece) {
+              this._setSpotState(x, y, SpotState.Hit);
+            }
           } else if(this.grids[playerId] != null) {
             this.grids[playerId].rows[y].cells[x].className = 'hit';
           }
