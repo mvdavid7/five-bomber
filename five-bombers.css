@@ -17,7 +17,7 @@ h1 {
 .menu { list-style-type: none; padding: 0; }
 .menu li { padding-top: 20px; }
 
-#controls { margin: 0 auto; width: 800px; height: 320px; }
+#controls { margin: 0 auto; width: 900px; height: 360px; display: none; }
 #matchlist { margin: 0 auto; width: 800px; }
 
 #opponents { width: 100%; }
@@ -26,8 +26,12 @@ h1 {
 #opponents .playerspot { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
 #opponents .empty { background-color: #F0F0F0; }
 
-.playergrid { border-spacing: 0px; margin: 0 auto; width: 100%; padding: 0; }
-.playergrid td { padding: 20px; margin: 0px; border: 1px solid black; }
+#player .blank { border-spacing: 0px; margin: 0 auto; padding: 0; width: 160px; height: 180px; }
+
+.playerspot label { white-space: nowrap; }
+
+.playergrid { border-spacing: 0px; margin: 0 auto; padding: 0; }
+.playergrid td { padding: 0px; margin: 0px; border: 1px solid black; width: 38px; height: 38px; }
 .clickable { cursor: pointer; }
 .online { border: 1px solid black; }
 .online.opponent td { cursor: pointer; }
