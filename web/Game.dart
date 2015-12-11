@@ -74,21 +74,19 @@ class Game {
 
   void _onMatchJoin(JsObject response) {
     if (!response['hasError']) {
+      querySelector('#controls').style.display = 'inherit';
       this.match = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
 
-      Element playerHolder = querySelector('#playercolumn');
+      Element playerHolder = querySelector('#self');
       playerHolder.children.clear();
 
       LabelElement name = new LabelElement();
       name.text = match['id'];
-      playerHolder.children.add(name);
-      playerHolder.children.add(new BRElement());
 
       this.grid = _renderGrid(playerHolder, player.username, player.account['id'], true);
       this.grid.className = 'playergrid online';
 
-      Element opponentHolder = querySelector('#opponentcolumn');
-      opponentHolder.children.clear();
+      Element opponentsRow = querySelector('#opponents');
       this.grids.clear();
 
       List<String> currentPlayers = this.match['players']['current'];
@@ -97,7 +95,10 @@ class Game {
         if(playerId != this.player.account['id']) {
           for(Map player in allPlayers) {
             if(player['account_id'] == playerId) {
-              this.grids[playerId] = _renderGrid(querySelector('#opponentcolumn'), player['identity']['username'], player['account_id'], false);
+              Element opponentHolder = querySelector('#opponent${this.grids.length + 1}');
+              opponentHolder.classes.remove('empty');
+              opponentHolder.classes.add('taken');
+              this.grids[playerId] = _renderGrid(opponentHolder, player['identity']['username'], player['account_id'], false);
               this.grids[playerId].className = 'playergrid offline';
               break;
             }
@@ -203,11 +204,12 @@ class Game {
     }
   }
 
-  void listMatches(HydraCallback callback) {
+  void _listMatches(HydraCallback callback) {
     hydraClient.put('matches/matchmaking/5-way', {'cluster': this.hydraClient.rtCluster}, (JsObject response) {
       if (!response['hasError']) {
         List matches = JSON.decode(context['JSON'].callMethod('stringify', [response['data']]));
         TableElement matchListHolder = querySelector('#matchlist');
+        matchListHolder.children.clear();
         matchListHolder.createTBody();
         for(Map existingMatch in matches) {
           TableRowElement row = matchListHolder.insertRow(-1);
@@ -231,6 +233,21 @@ class Game {
 
       callback(response);
     });
+  }
+
+  void listMatches(HydraCallback callback) {
+    if(isAuthenticated) {
+      _listMatches(callback);
+    } else {
+      hydraLogin({'anonymous': true}, (JsObject response) {
+        if (!response['hasError']) {
+          listMatches(callback);
+        } else {
+          callback(response);
+        }
+      });
+    }
+
   }
 
   void hydraLogin(var auth, HydraCallback callback) {
